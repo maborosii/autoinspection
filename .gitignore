@@ -1,0 +1,5 @@
+*.log
+logs/
+.vscode/
+monitor.toml
+config.toml

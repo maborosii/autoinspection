@@ -1,0 +1,56 @@
+address = "http://prometheus:9090"
+timeout = 10
+
+[[monitoritems]]
+metrics = "cpu_usage_percents"
+promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m]))by(instance))*100"
+
+[[monitoritems]]
+metrics = "cpu_usage_percents_before"
+promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m] offset 1w))by(instance))*100"
+
+[[monitoritems]]
+metrics = "mem_usage_percents"
+promql = "(1-(node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes))* 100"
+
+[[monitoritems]]
+metrics = "mem_usage_percents_before"
+promql = "(1-((node_memory_MemAvailable_bytes offset 1w)/node_memory_MemTotal_bytes))* 100"
+# [[monitor_items]]
+# metrics = "disk_usage_percents"
+# current_promql = "(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"})*100/(node_filesystem_avail_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}+(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}))"
+# before_7d_promql = "(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"} offset 1w)*100/(node_filesystem_avail_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"} offset 1w +(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"} offset 1w))"
+
+
+[[thresholds]]
+job = "Redis组"
+cpu = 55
+cpu_increase = 10
+mem = 60
+mem_increase = 10
+# disk = 80
+
+[[thresholds]]
+job = "netty-iot"
+cpu = 35
+cpu_increase = 10
+mem = 60
+mem_increase = 10
+# disk = 80
+
+# [[thresholds]]
+# job = "网关组"
+# cpu = 55
+# cpu_rate_before_7d = 10
+# mem = 60
+# mem_rate_before_7d = 10
+# disk = 80
+
+[logconfig]
+level = "debug"
+logfile = "./logs/node_metrics.log"
+maxsize = 0
+maxage = 29
+maxbackups = 4
+
+
