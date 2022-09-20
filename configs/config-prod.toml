@@ -21,30 +21,20 @@ promql = "(1-((node_memory_MemAvailable_bytes offset 1w)/node_memory_MemTotal_by
 # current_promql = "(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"})*100/(node_filesystem_avail_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}+(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}))"
 # before_7d_promql = "(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"} offset 1w)*100/(node_filesystem_avail_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"} offset 1w +(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"} offset 1w))"
 
-
-[[thresholds]]
-job = "Redis组"
-cpu = 55
-cpu_increase = 10
-mem = 60
-mem_increase = 10
-# disk = 80
-
-[[thresholds]]
-job = "netty-iot"
-cpu = 35
-cpu_increase = 10
-mem = 60
-mem_increase = 10
-# disk = 80
-
-# [[thresholds]]
-# job = "网关组"
-# cpu = 55
-# cpu_rate_before_7d = 10
-# mem = 60
-# mem_rate_before_7d = 10
-# disk = 80
+[rules]
+    [[rules.node]]
+    job = "Redis组"
+    cpu = 55
+    cpuIncrease = 10
+    mem = 60
+    memIncrease = 10
+    # disk = 80
+    [[rules.node]]
+    job = "netty-iot"
+    cpu = 35
+    cpuIncrease = 10
+    mem = 60
+    memIncrease = 10
 
 [logconfig]
 level = "debug"
