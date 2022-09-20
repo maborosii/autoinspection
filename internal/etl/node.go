@@ -3,7 +3,7 @@ package etl
 import "fmt"
 
 type NodeMetrics struct {
-	*MetricsInfo
+	*BaseMetrics
 	NodeName       string
 	CpuUsage       string
 	BeforeCpuUsage string
@@ -17,10 +17,6 @@ type NodeMetrics struct {
 // 	usage        string
 // 	increaseDisk string
 // }
-
-type NotifyRule struct {
-	job string
-}
 
 type NodeOption func(*NodeMetrics)
 
@@ -59,9 +55,9 @@ func WithBeforeMemUsage(beforeMemUsage string) NodeOption {
 }
 
 func NewNodeMetrics(instance string, options ...NodeOption) *NodeMetrics {
-	mi := &MetricsInfo{Instance: instance}
+	mi := &BaseMetrics{Instance: instance}
 	sr := &NodeMetrics{
-		MetricsInfo: mi,
+		BaseMetrics: mi,
 	}
 	for _, option := range options {
 		option(sr)
@@ -69,10 +65,10 @@ func NewNodeMetrics(instance string, options ...NodeOption) *NodeMetrics {
 	return sr
 }
 
-func (sr *MetricsInfo) GetInstance() string {
+func (sr *BaseMetrics) GetInstance() string {
 	return sr.Instance
 }
-func (sr *MetricsInfo) GetJob() string {
+func (sr *BaseMetrics) GetJob() string {
 	return sr.Job
 }
 func (sr *NodeMetrics) Print() string {

@@ -1,21 +1,12 @@
 package setting
 
-type MonitorConfig struct {
-	Address      string        `toml:"address"`
-	TimeOut      int           `toml:"timeout"`
-	MonitorItems MonitorItems  `toml:"monitorItems"`
-	Thresholds   []*NotifyRule `toml:"thresholds"`
-	LogConfig    *LogConf      `toml:"logconfig"`
+type Config struct {
+	Address      string                   `toml:"address"`
+	TimeOut      int                      `toml:"timeout"`
+	MonitorItems MonitorItems             `toml:"monitorItems"`
+	Rules        map[string][]interface{} `toml:"rules" mapstructure:"rules"`
+	LogConfig    *LogConf                 `toml:"logconfig"`
 }
-type NotifyRule struct {
-	Job                  string `toml:"job"`
-	CpuThreshold         string `toml:"cpu"`
-	CpuIncreaseThreshold string `toml:"cpu_increase"`
-	MemThreshold         string `toml:"mem"`
-	MemIncreaseThreshold string `toml:"mem_increase"`
-	// DiskThreshold        string `toml:"disk"`
-}
-
 type LogConf struct {
 	Level      string `toml:"level"`
 	LogFile    string `toml:"logfile"`
@@ -24,22 +15,21 @@ type LogConf struct {
 	MaxBackups int    `toml:"maxbackups"`
 }
 
-func (conf *MonitorConfig) GetTimeOut() int {
+func (conf *Config) GetTimeOut() int {
 	return conf.TimeOut
 }
-func (conf *MonitorConfig) GetAddress() string {
+func (conf *Config) GetAddress() string {
 	return conf.Address
 }
-func (conf *MonitorConfig) GetMonitorItems() map[string]string {
+func (conf *Config) GetMonitorItems() map[string]string {
 	return conf.MonitorItems.ConvertToMap()
 }
-
-func (conf *MonitorConfig) GetLogConfig() *LogConf {
+func (conf *Config) GetLogConfig() *LogConf {
 	return conf.LogConfig
 }
 
-func NewMonitorConfig() *MonitorConfig {
-	return &MonitorConfig{}
+func NewConfig() *Config {
+	return &Config{}
 }
 
 type MonitorItems []*MonitorItem

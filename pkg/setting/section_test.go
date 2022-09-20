@@ -9,7 +9,7 @@ func TestMonitorConfig_GetTimeOut(t *testing.T) {
 		Address   string
 		TimeOut   int
 		Items     MonitorItems
-		Rules     []*NotifyRule
+		Rules     map[string][]interface{}
 		LogConfig *LogConf
 	}
 	tests := []struct {
@@ -21,11 +21,11 @@ func TestMonitorConfig_GetTimeOut(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			conf := &MonitorConfig{
+			conf := &Config{
 				Address:      tt.fields.Address,
 				TimeOut:      tt.fields.TimeOut,
 				MonitorItems: tt.fields.Items,
-				Thresholds:   tt.fields.Rules,
+				Rules:        tt.fields.Rules,
 				LogConfig:    tt.fields.LogConfig,
 			}
 			if got := conf.GetTimeOut(); got != tt.want {

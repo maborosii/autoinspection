@@ -7,7 +7,6 @@ import (
 // 初始化时获取映射关系
 var instanceToNodeName = make(map[string]string, 400)
 var instanceToJob = make(map[string]string, 400)
-var promQLForMap = "node_uname_info - 0"
 
 // 数据传输通道
 var metricsChan = make(chan *QueryResult)

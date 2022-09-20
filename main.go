@@ -5,36 +5,32 @@ import (
 	"log"
 	"node_metrics_go/cmd"
 	"node_metrics_go/global"
+	"node_metrics_go/infra"
+	"node_metrics_go/infra/starters"
 	"node_metrics_go/internal/etl"
-	"node_metrics_go/pkg/logger"
 	"node_metrics_go/pkg/setting"
 
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	"go.uber.org/zap"
 )
 
-func init() {
+func main() {
 	// 获取配置文件
 	var err error
 	err = cmd.Execute()
 	if err != nil {
 		log.Fatalf("cmd.Execute err: %v", err)
 	}
-	fmt.Println(global.ConfigPath)
-	// 初始化配置
-	err = setupSetting()
+	conf, err := setting.NewSetting(global.ConfigPath)
 	if err != nil {
-		log.Fatalf("init.setupSetting err: %v", err)
+		panic(fmt.Sprintf("get config from %s, occurred err; %s", global.ConfigPath, err))
 	}
-	// 初始化日志
-	err = setupLogger()
-	if err != nil {
-		log.Fatalf("init.setupLogger err: %v", err)
+	confStruct := &setting.Config{}
+	if err = conf.ReadConfig(confStruct); err != nil {
+		panic(err)
 	}
-}
-
-func main() {
-	// 手动将缓冲区日志内容刷入
-	defer global.Logger.Sync()
+	app := infra.NewBootApplication(confStruct)
+	app.Run()
 
 	// 存储最终指标
 	var nodeStoreResults = etl.NewNodeMetricsSlice()
@@ -57,34 +53,15 @@ func main() {
 	go etl.ShuffleResult(len(global.MonitorSetting.GetMonitorItems()), &nodeStoreResults)
 	etl.WgReceiver.Wait()
 
-	// writeResults := [][]string{}
-	// for _, sr := range nodeStoreResults {
-	// 	global.Logger.Info("get node of all metrics", zap.String("metrics", sr.Print()))
-	// 	writeResults = append(writeResults, sr.ConvertToSlice())
-	// }
-	// fmt.Printf("%+v", writeResults)
+	writeResults := [][]string{}
+	for _, sr := range nodeStoreResults {
+		global.Logger.Info("get node of all metrics", zap.String("metrics", sr.Print()))
+		writeResults = append(writeResults, sr.ConvertToSlice())
+	}
+	fmt.Printf("%+v", writeResults)
+
 }
 
-// 根据配置文件位置读取配置文件
-func setupSetting() error {
-	setting, err := setting.NewSetting(global.ConfigPath)
-	if err != nil {
-		return err
-	}
-	err = setting.ReadConfig(&global.MonitorSetting)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// 初始化日志配置
-func setupLogger() error {
-	logConfig := global.MonitorSetting.GetLogConfig()
-	err := logger.InitLogger(logConfig)
-	if err != nil {
-		return err
-	}
-	return nil
+func init() {
+	infra.Register(&starters.LogStarter{}, &starters.MonitorStarter{}, &starters.RulesStarter{})
 }
