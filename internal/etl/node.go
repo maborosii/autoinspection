@@ -5,10 +5,10 @@ import "fmt"
 type NodeMetrics struct {
 	*BaseMetrics
 	NodeName       string
-	CpuUsage       string
-	BeforeCpuUsage string
-	MemUsage       string
-	BeforeMemUsage string
+	CpuUsage       float32
+	BeforeCpuUsage float32
+	MemUsage       float32
+	BeforeMemUsage float32
 	// diskUsage        []Disk
 }
 
@@ -18,43 +18,47 @@ type NodeMetrics struct {
 // 	increaseDisk string
 // }
 
-type NodeOption func(*NodeMetrics)
+// type NodeOption func(*NodeMetrics)
 
-func WithNodeJob(job string) NodeOption {
-	return func(sr *NodeMetrics) {
-		sr.Job = job
-	}
-}
-func WithNodeName(nodeName string) NodeOption {
-	return func(sr *NodeMetrics) {
-		sr.NodeName = nodeName
-	}
-}
+// pre asset
+// var a MetricsItf
+// var _ = a.(*NodeMetrics)
 
-func WithCpuUsage(cpuUsage string) NodeOption {
-	return func(sr *NodeMetrics) {
-		sr.CpuUsage = cpuUsage
+func WithNodeJob(job string) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).Job = job
 	}
 }
-func WithBeforeCpuUsage(beforeCpuUsage string) NodeOption {
-	return func(sr *NodeMetrics) {
-		sr.BeforeCpuUsage = beforeCpuUsage
+func WithNodeName(nodeName string) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).NodeName = nodeName
 	}
 }
 
-func WithMemUsage(memUsage string) NodeOption {
-	return func(sr *NodeMetrics) {
-		sr.MemUsage = memUsage
+func WithCpuUsage(cpuUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).CpuUsage = cpuUsage
+	}
+}
+func WithBeforeCpuUsage(beforeCpuUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).BeforeCpuUsage = beforeCpuUsage
 	}
 }
 
-func WithBeforeMemUsage(beforeMemUsage string) NodeOption {
-	return func(sr *NodeMetrics) {
-		sr.BeforeMemUsage = beforeMemUsage
+func WithMemUsage(memUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).MemUsage = memUsage
 	}
 }
 
-func NewNodeMetrics(instance string, options ...NodeOption) *NodeMetrics {
+func WithBeforeMemUsage(beforeMemUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).BeforeMemUsage = beforeMemUsage
+	}
+}
+
+func NewNodeMetrics(instance string, options ...MetricsOption) *NodeMetrics {
 	mi := &BaseMetrics{Instance: instance}
 	sr := &NodeMetrics{
 		BaseMetrics: mi,
@@ -65,16 +69,10 @@ func NewNodeMetrics(instance string, options ...NodeOption) *NodeMetrics {
 	return sr
 }
 
-func (sr *BaseMetrics) GetInstance() string {
-	return sr.Instance
-}
-func (sr *BaseMetrics) GetJob() string {
-	return sr.Job
-}
 func (sr *NodeMetrics) Print() string {
-	return fmt.Sprintf("## job: %s,nodeName: %s,instance: %s,cpuUsage: %s,cpuUsageBefore: %s,memUsage: %s,memUsageBefore: %s", sr.Job, sr.NodeName, sr.Instance, sr.CpuUsage, sr.BeforeCpuUsage, sr.MemUsage, sr.BeforeMemUsage)
+	return fmt.Sprintf("## job: %s,nodeName: %s,instance: %s,cpuUsage: %f,cpuUsageBefore: %f,memUsage: %f,memUsageBefore: %f", sr.Job, sr.NodeName, sr.Instance, sr.CpuUsage, sr.BeforeCpuUsage, sr.MemUsage, sr.BeforeMemUsage)
 }
-func (sr *NodeMetrics) ModifyStoreResult(options ...NodeOption) {
+func (sr *NodeMetrics) ModifyStoreResult(options ...MetricsOption) {
 	for _, option := range options {
 		option(sr)
 	}
@@ -86,10 +84,10 @@ func (sr *NodeMetrics) ConvertToSlice() []string {
 		sr.Job,
 		sr.NodeName,
 		sr.Instance,
-		sr.CpuUsage,
-		sr.BeforeCpuUsage,
-		sr.MemUsage,
-		sr.BeforeMemUsage,
+		fmt.Sprintf("%f", sr.CpuUsage),
+		fmt.Sprintf("%f", sr.BeforeCpuUsage),
+		fmt.Sprintf("%f", sr.MemUsage),
+		fmt.Sprintf("%f", sr.BeforeMemUsage),
 	}
 }
 
@@ -109,7 +107,7 @@ func (srs NodeMetricsSlice) findInstance(instance string) (bool, int) {
 }
 
 // 创建或更新主机指标
-func (srs *NodeMetricsSlice) CreateOrModifyStoreResults(instance string, options ...NodeOption) {
+func (srs *NodeMetricsSlice) CreateOrModifyStoreResults(instance string, options ...MetricsOption) {
 	ok, index := (*srs).findInstance(instance)
 	if ok {
 		(*srs)[index].ModifyStoreResult(options...)

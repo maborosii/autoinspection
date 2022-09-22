@@ -11,7 +11,6 @@ import (
 	"node_metrics_go/pkg/setting"
 
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -53,12 +52,12 @@ func main() {
 	go etl.ShuffleResult(len(global.MonitorSetting.GetMonitorItems()), &nodeStoreResults)
 	etl.WgReceiver.Wait()
 
-	writeResults := [][]string{}
-	for _, sr := range nodeStoreResults {
-		global.Logger.Info("get node of all metrics", zap.String("metrics", sr.Print()))
-		writeResults = append(writeResults, sr.ConvertToSlice())
-	}
-	fmt.Printf("%+v", writeResults)
+	// writeResults := [][]string{}
+	// for _, sr := range nodeStoreResults {
+	// 	global.Logger.Info("get node of all metrics", zap.String("metrics", sr.Print()))
+	// 	writeResults = append(writeResults, sr.ConvertToSlice())
+	// }
+	// // fmt.Printf("%+v", writeResults)
 
 }
 
