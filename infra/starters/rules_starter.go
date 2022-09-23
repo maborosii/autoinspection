@@ -30,7 +30,8 @@ func (d *RulesStarter) setupRules(conf *setting.Config) {
 				if err != nil {
 					panic(fmt.Sprintf("mapstructure rules for node_rule occur error: %s", err))
 				}
-				global.NotifyRules = append(global.NotifyRules, nodeRule)
+				// global.NotifyRules = append(global.NotifyRules, nodeRule)
+				global.NotifyRules[nodeRule.GetRuleJob()] = nodeRule
 			}
 		}
 	}

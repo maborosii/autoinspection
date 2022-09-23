@@ -9,6 +9,39 @@ type NodeRule struct {
 	MemIncrease float32 `mapstructure:"memIncrease"`
 }
 
-func (n *NodeRule) GetJob() string {
+func (n *NodeRule) GetRuleJob() string {
 	return n.Job
+}
+func WithCpuRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) bool {
+		if nums < r.(*NodeRule).Cpu {
+			return true
+		}
+		return false
+	}
+
+}
+func WithMemRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) bool {
+		if nums < r.(*NodeRule).Mem {
+			return true
+		}
+		return false
+	}
+}
+func WithMemIncreaseRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) bool {
+		if nums < r.(*NodeRule).MemIncrease {
+			return true
+		}
+		return false
+	}
+}
+func WithCpuIncreaseRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) bool {
+		if nums < r.(*NodeRule).CpuIncrease {
+			return true
+		}
+		return false
+	}
 }

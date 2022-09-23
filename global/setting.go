@@ -15,6 +15,4 @@ var (
 )
 
 var PromQLForMap = "node_uname_info - 0"
-var NotifyRules = make([]rs.RuleItf, 0, 100)
-
-// var NodeRules = make([]*rs.NodeRule, 0, 20)
+var NotifyRules = make(map[string]rs.RuleItf, 100)

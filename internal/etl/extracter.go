@@ -98,6 +98,4 @@ func QueryFromPromDemo(promql string, api v1.API) {
 	result, _, _ := api.Query(ctx, promql, time.Now())
 
 	fmt.Printf("%v\n", result.String())
-	// fmt.Println(result.String())
-	// fmt.Printf("%v\n", result.String())
 }

@@ -32,7 +32,8 @@ func main() {
 	app.Run()
 
 	// 存储最终指标
-	var nodeStoreResults = etl.NewNodeMetricsSlice()
+	var nodeStoreResults = make(etl.MetricsMap)
+	// var nodeStoreResults = etl.NewNodeMetricsSlice()
 
 	// prom客户端api
 	queryApi := etl.ClientForProm(global.MonitorSetting.GetAddress())
@@ -47,17 +48,18 @@ func main() {
 			etl.SendQueryResultToChan(label, sql, queryApi)
 		}(label, sql, queryApi)
 	}
+
 	etl.WgReceiver.Add(1)
 	// 转换数据
 	go etl.ShuffleResult(len(global.MonitorSetting.GetMonitorItems()), &nodeStoreResults)
 	etl.WgReceiver.Wait()
 
-	// writeResults := [][]string{}
+	nodeStoreResults.MapToJobAndNodeName()
+	nodeStoreResults.MapToRules()
 	// for _, sr := range nodeStoreResults {
 	// 	global.Logger.Info("get node of all metrics", zap.String("metrics", sr.Print()))
-	// 	writeResults = append(writeResults, sr.ConvertToSlice())
 	// }
-	// // fmt.Printf("%+v", writeResults)
+	nodeStoreResults.Notify()
 
 }
 

@@ -1,7 +1,6 @@
 package etl
 
 import (
-	"fmt"
 	"node_metrics_go/global"
 	"strconv"
 
@@ -9,7 +8,7 @@ import (
 )
 
 // 将返回的结果进行转换
-func ShuffleResult(series int, storeResults *NodeMetricsSlice) {
+func ShuffleResult(series int, storeResults *MetricsMap) {
 	defer WgReceiver.Done()
 	for i := 0; i < series; i++ {
 		queryResult := <-metricsChan
@@ -21,21 +20,21 @@ func ShuffleResult(series int, storeResults *NodeMetricsSlice) {
 				value = 0
 			}
 			newValue := float32(value)
-			fmt.Println(result[0], newValue, queryResult.GetLabel())
 			switch queryResult.GetLabel() {
 			case "cpu_usage_percents":
-				storeResults.CreateOrModifyStoreResults(result[0], WithCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithCpuUsage(newValue))
 			case "cpu_usage_percents_before":
-				storeResults.CreateOrModifyStoreResults(result[0], WithBeforeCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBeforeCpuUsage(newValue))
 			case "mem_usage_percents":
-				storeResults.CreateOrModifyStoreResults(result[0], WithMemUsage(newValue))
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithMemUsage(newValue))
 			case "mem_usage_percents_before":
-				storeResults.CreateOrModifyStoreResults(result[0], WithBeforeMemUsage(newValue))
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBeforeMemUsage(newValue))
 			default:
 				global.Logger.Info("Default")
 			}
 			// 添加jobname 和 nodename
-			storeResults.CreateOrModifyStoreResults(result[0], WithNodeJob(instanceToJob[result[0]]), WithNodeName(instanceToNodeName[result[0]]))
+			// TODO: 重复添加
+			// storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithNodeName(instanceToJob[result[0]]), WithNodeName(instanceToNodeName[result[0]]))
 		}
 	}
 	close(notifyChan)
