@@ -29,12 +29,17 @@ func ShuffleResult(series int, storeResults *MetricsMap) {
 				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithMemUsage(newValue))
 			case "mem_usage_percents_before":
 				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBeforeMemUsage(newValue))
+			case "disk_usage_percents":
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithDiskUsage(newValue))
+			case "disk_usage_percents_before":
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBeforeDiskUsage(newValue))
+			case "tcp_conn_counts":
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithTcpConnUsage(newValue))
+			case "tcp_conn_counts_before":
+				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBeforeTcpConnUsage(newValue))
 			default:
-				global.Logger.Info("Default")
+				global.Logger.Info("NOT FOUND IN USE METRICS LABEL")
 			}
-			// 添加jobname 和 nodename
-			// TODO: 重复添加
-			// storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithNodeName(instanceToJob[result[0]]), WithNodeName(instanceToNodeName[result[0]]))
 		}
 	}
 	close(notifyChan)

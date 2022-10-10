@@ -1,7 +1,11 @@
 package etl
 
 import (
+	"fmt"
 	"node_metrics_go/global"
+	ph "node_metrics_go/internal/pusher"
+	"node_metrics_go/internal/pusher/mail"
+
 	rs "node_metrics_go/pkg/rules"
 
 	"go.uber.org/zap"
@@ -54,7 +58,7 @@ func (m MetricsMap) MapToJobAndNodeName() {
 		case *NodeMetrics:
 			WithNodeJob(instanceToJob[k])(v)
 			WithNodeName(instanceToNodeName[k])(v)
-			global.Logger.Info("mapping instance to nodeName and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("mapping instance to nodeName and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 		default:
 			global.Logger.Info("unknown type for MetricsItf")
 		}
@@ -72,10 +76,18 @@ func (m MetricsMap) MapToRules() {
 	}
 }
 func (m MetricsMap) Notify() {
-
 	for _, v := range m {
 		if str, ok := v.Filter(); !ok {
-			global.Logger.Info(str, zap.String("metrics", v.Print()))
+			global.Logger.Debug(str, zap.String("metrics", v.Print()))
 		}
+	}
+	fmt.Println(len(nodeOutputMessageList))
+	var mailMessage string
+	for _, v := range nodeOutputMessageList {
+		mailMessage += v.Print()
+	}
+	mm := mail.NewMailMessage(mailMessage)
+	if len(nodeOutputMessageList) != 0 {
+		ph.PusherList.Exec(mm)
 	}
 }

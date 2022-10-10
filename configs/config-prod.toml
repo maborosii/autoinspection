@@ -16,10 +16,22 @@ promql = "(1-(node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes))* 100"
 [[monitoritems]]
 metrics = "mem_usage_percents_before"
 promql = "(1-((node_memory_MemAvailable_bytes offset 1w)/node_memory_MemTotal_bytes))* 100"
-# [[monitor_items]]
-# metrics = "disk_usage_percents"
-# current_promql = "(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"})*100/(node_filesystem_avail_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}+(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}))"
-# before_7d_promql = "(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"} offset 1w)*100/(node_filesystem_avail_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"} offset 1w +(node_filesystem_size_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"}-node_filesystem_free_bytes{fstype=~\"ext.*|xfs\",mountpoint!~\".*pod.*\"} offset 1w))"
+
+[[monitoritems]]
+metrics = "disk_usage_percents"
+promql = "max((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"})*100/(node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"}+(node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"})))by(instance)"
+
+[[monitoritems]]
+metrics = "disk_usage_percents_before"
+promql = "max(((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1w)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1w)) *100/((node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"} offset 1w)+((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1w)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1w))))by(instance)"
+
+[[monitoritems]]
+metrics = "tcp_conn_counts"
+promql = "node_netstat_Tcp_CurrEstab-0"
+
+[[monitoritems]]
+metrics = "tcp_conn_counts_before"
+promql = "(node_netstat_Tcp_CurrEstab offset 1w)-0"
 
 [rules]
     [[rules.node]]
@@ -28,13 +40,20 @@ promql = "(1-((node_memory_MemAvailable_bytes offset 1w)/node_memory_MemTotal_by
     cpuIncrease = 10
     mem = 60
     memIncrease = 10
-    # disk = 80
+    disk = 80
+    diskIncrease = 10
+    tcpConn = 1000
+    tcpConnIncrease = 10
     [[rules.node]]
     job = "netty-iot"
     cpu = 35
     cpuIncrease = 10
     mem = 60
     memIncrease = 10
+    disk = 80
+    diskIncrease = 10
+    tcpConn = 1000
+    tcpConnIncrease = 10
 
 [logconfig]
 level = "debug"

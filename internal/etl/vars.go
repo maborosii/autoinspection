@@ -25,3 +25,5 @@ var mapPattenForNode = `(?m)instance="(.*?)".*\sjob="(.*?)".*\snodename="(.*?)".
 // 正则表达式匹配模式 --> 筛选出 intance 和 value
 // 获取指标值的正则
 var valuePattern = `(?m)instance="(.*?)".*\s=>\s*(\d*\.?\d{0,2}).*$`
+
+var nodeOutputMessageList = make([]*NodeOutputMessage, 0, 2000)

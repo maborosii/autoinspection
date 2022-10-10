@@ -3,3 +3,4 @@ logs/
 .vscode/
 monitor.toml
 config.toml
+email_test.go

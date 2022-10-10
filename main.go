@@ -64,5 +64,5 @@ func main() {
 }
 
 func init() {
-	infra.Register(&starters.LogStarter{}, &starters.MonitorStarter{}, &starters.RulesStarter{})
+	infra.Register(&starters.LogStarter{}, &starters.MonitorStarter{}, &starters.RulesStarter{}, &starters.MailStarter{})
 }
