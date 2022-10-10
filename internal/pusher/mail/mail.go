@@ -2,6 +2,7 @@ package mail
 
 import (
 	"fmt"
+	"node_metrics_go/global"
 	"node_metrics_go/internal/message"
 	mail "node_metrics_go/pkg/email"
 )
@@ -45,7 +46,7 @@ func (p *MailPusher) Push(m message.OutMessage) error {
 	if !ok {
 		return fmt.Errorf("mail message asset failed")
 	}
-	if err := p.Mail.Send("主机巡检详情", mm.GetContent(), []string{"liushuai@leyaoyao.com"}); err != nil {
+	if err := p.Mail.Send("主机巡检详情", mm.GetContent(), global.Mailer.To); err != nil {
 		// if err := p.Mail.Send(mm.GetSubject(), mm.GetContent(), mm.GetToAddr()); err != nil {
 		return err
 	}

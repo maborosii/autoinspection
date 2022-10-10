@@ -1,14 +1,19 @@
 package setting
 
-import mail "node_metrics_go/pkg/email"
-
 type Config struct {
 	Address      string                   `toml:"address"`
 	TimeOut      int                      `toml:"timeout"`
 	MonitorItems MonitorItems             `toml:"monitoritems"`
 	Rules        map[string][]interface{} `toml:"rules" mapstructure:"rules"`
 	LogConfig    *LogConf                 `toml:"logconfig"`
-	MailConfig   *mail.Mail               `toml:"mailconfig"`
+	MailConfig   *MailConf                `toml:"mailconfig"`
+}
+type MailConf struct {
+	Host     string   `toml:"host"`
+	UserName string   `toml:"username"`
+	Password string   `toml:"password"`
+	Port     int      `toml:"port"`
+	To       []string `toml:"to"`
 }
 type LogConf struct {
 	Level      string `toml:"level"`

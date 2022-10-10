@@ -4,3 +4,4 @@ logs/
 monitor.toml
 config.toml
 email_test.go
+mail_test.go
