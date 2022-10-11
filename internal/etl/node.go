@@ -75,49 +75,49 @@ func (sr *NodeMetrics) Filter() (string, bool) {
 	tcpConnInc := increaseRate(sr.beforeTcpConnUsage, sr.tcpConnUsage)
 
 	if alertM, ok := rs.WithCpuRuleFilter(sr.cpuUsage)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_LIMIT, sr.cpuUsage, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_LIMIT, alertM.(float32), sr.cpuUsage))
 
 		global.Logger.Info("cpu exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_usage", sr.cpuUsage))
 		return CPU_LIMIT, false
 	}
 	if alertM, ok := rs.WithCpuIncreaseRuleFilter(cpuInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT, cpuInc, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT, alertM.(float32), cpuInc))
 
 		global.Logger.Info("cpu rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_increase_usage", cpuInc))
 		return CPU_RATE_LIMIT, false
 	}
 	if alertM, ok := rs.WithMemRuleFilter(sr.memUsage)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_LIMIT, sr.memUsage, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_LIMIT, alertM.(float32), sr.memUsage))
 
 		global.Logger.Info("mem exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_usage", sr.memUsage))
 		return MEM_LIMIT, false
 	}
 	if alertM, ok := rs.WithMemIncreaseRuleFilter(memInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT, memInc, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT, alertM.(float32), memInc))
 
 		global.Logger.Info("mem rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_increase_usage", memInc))
 		return MEM_RATE_LIMIT, false
 	}
 	if alertM, ok := rs.WithDiskRuleFilter(sr.diskUsage)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_LIMIT, sr.diskUsage, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_LIMIT, alertM.(float32), sr.diskUsage))
 
 		global.Logger.Info("disk exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_usage", sr.diskUsage))
 		return DISK_LIMIT, false
 	}
 	if alertM, ok := rs.WithDiskIncreaseRuleFilter(diskInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT, diskInc, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT, alertM.(float32), diskInc))
 
 		global.Logger.Info("disk rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_increase_usage", diskInc))
 		return DISK_RATE_LIMIT, false
 	}
 	if alertM, ok := rs.WithTcpConnRuleFilter(sr.tcpConnUsage)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_LIMIT, sr.tcpConnUsage, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_LIMIT, alertM.(float32), sr.tcpConnUsage))
 
 		global.Logger.Info("tcp conn counts exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_counts", sr.tcpConnUsage))
 		return TCP_CONN_LIMIT, false
 	}
 	if alertM, ok := rs.WithTcpConnIncreaseRuleFilter(tcpConnInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT, tcpConnInc, alertM.(float32)))
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT, alertM.(float32), tcpConnInc))
 
 		global.Logger.Info("tcp conn counts rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts", tcpConnInc))
 		return TCP_CONN_RATE_LIMIT, false
