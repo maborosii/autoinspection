@@ -2,15 +2,19 @@ package rules
 
 type NodeRule struct {
 	BaseRule
-	Job             string  `mapstructure:"job"`
-	Cpu             float32 `mapstructure:"cpu"`
-	CpuIncrease     float32 `mapstructure:"cpuIncrease"`
-	Mem             float32 `mapstructure:"mem"`
-	MemIncrease     float32 `mapstructure:"memIncrease"`
-	Disk            float32 `mapstructure:"disk"`
-	DiskIncrease    float32 `mapstructure:"diskIncrease"`
-	TcpConn         float32 `mapstructure:"tcpConn"`
-	TcpConnIncrease float32 `mapstructure:"tcpConnIncrease"`
+	Job                  string  `mapstructure:"job"`
+	Cpu                  float32 `mapstructure:"cpu"`
+	CpuIncrease1Day      float32 `mapstructure:"cpuIncrease1Day"`
+	CpuIncrease1Week     float32 `mapstructure:"cpuIncrease1Week"`
+	Mem                  float32 `mapstructure:"mem"`
+	MemIncrease1Day      float32 `mapstructure:"memIncrease1Day"`
+	MemIncrease1Week     float32 `mapstructure:"memIncrease1Week"`
+	Disk                 float32 `mapstructure:"disk"`
+	DiskIncrease1Day     float32 `mapstructure:"diskIncrease1Day"`
+	DiskIncrease1Week    float32 `mapstructure:"diskIncrease1Week"`
+	TcpConn              float32 `mapstructure:"tcpConn"`
+	TcpConnIncrease1Day  float32 `mapstructure:"tcpConnIncrease1Day"`
+	TcpConnIncrease1Week float32 `mapstructure:"tcpConnIncrease1Week"`
 }
 
 func (n *NodeRule) GetRuleJob() string {
@@ -29,10 +33,21 @@ func WithCpuRuleFilter(nums float32) RuleOption {
 	}
 }
 
-// cpu 一周增长率判断
-func WithCpuIncreaseRuleFilter(nums float32) RuleOption {
+// cpu 一天增长率判断
+func WithCpuIncrease1DayRuleFilter(nums float32) RuleOption {
 	return func(r RuleItf) (interface{}, bool) {
-		limit := r.(*NodeRule).CpuIncrease
+		limit := r.(*NodeRule).CpuIncrease1Day
+		if nums < limit {
+			return limit, true
+		}
+		return limit, false
+	}
+}
+
+// cpu 一周增长率判断
+func WithCpuIncrease1WeekRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) (interface{}, bool) {
+		limit := r.(*NodeRule).CpuIncrease1Week
 		if nums < limit {
 			return limit, true
 		}
@@ -51,10 +66,21 @@ func WithMemRuleFilter(nums float32) RuleOption {
 	}
 }
 
-// 内存一周增长判断
-func WithMemIncreaseRuleFilter(nums float32) RuleOption {
+// 内存一天增长判断
+func WithMemIncrease1DayRuleFilter(nums float32) RuleOption {
 	return func(r RuleItf) (interface{}, bool) {
-		limit := r.(*NodeRule).MemIncrease
+		limit := r.(*NodeRule).MemIncrease1Day
+		if nums < limit {
+			return limit, true
+		}
+		return limit, false
+	}
+}
+
+// 内存一周增长判断
+func WithMemIncrease1WeekRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) (interface{}, bool) {
+		limit := r.(*NodeRule).MemIncrease1Week
 		if nums < limit {
 			return limit, true
 		}
@@ -73,10 +99,21 @@ func WithDiskRuleFilter(nums float32) RuleOption {
 	}
 }
 
-// 磁盘一周增长率判断
-func WithDiskIncreaseRuleFilter(nums float32) RuleOption {
+// 磁盘一天增长率判断
+func WithDiskIncrease1DayRuleFilter(nums float32) RuleOption {
 	return func(r RuleItf) (interface{}, bool) {
-		limit := r.(*NodeRule).DiskIncrease
+		limit := r.(*NodeRule).DiskIncrease1Day
+		if nums < limit {
+			return limit, true
+		}
+		return limit, false
+	}
+}
+
+// 磁盘一周增长率判断
+func WithDiskIncrease1WeekRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) (interface{}, bool) {
+		limit := r.(*NodeRule).DiskIncrease1Week
 		if nums < limit {
 			return limit, true
 		}
@@ -95,10 +132,21 @@ func WithTcpConnRuleFilter(nums float32) RuleOption {
 	}
 }
 
-// tcp 连接数一周增长率判断
-func WithTcpConnIncreaseRuleFilter(nums float32) RuleOption {
+// tcp 连接数一天增长率判断
+func WithTcpConnIncrease1DayRuleFilter(nums float32) RuleOption {
 	return func(r RuleItf) (interface{}, bool) {
-		limit := r.(*NodeRule).TcpConnIncrease
+		limit := r.(*NodeRule).TcpConnIncrease1Day
+		if nums < limit {
+			return limit, true
+		}
+		return limit, false
+	}
+}
+
+// tcp 连接数一周增长率判断
+func WithTcpConnIncrease1WeekRuleFilter(nums float32) RuleOption {
+	return func(r RuleItf) (interface{}, bool) {
+		limit := r.(*NodeRule).TcpConnIncrease1Week
 		if nums < limit {
 			return limit, true
 		}

@@ -73,7 +73,7 @@ func SendQueryResultToChan(label string, promql string, api v1.API) {
 	concurrencyChan <- struct{}{}
 	metricsChan <- QueryFromProm(label, promql, api)
 	global.Logger.Info("metics gotten", zap.String("label", label))
-	<-notifyChan
+	// <-notifyChan
 }
 
 func QueryFromProm(label string, promql string, api v1.API) *QueryResult {

@@ -10,15 +10,19 @@ import (
 
 type NodeMetrics struct {
 	*BaseMetrics
-	nodeName           string
-	cpuUsage           float32
-	beforeCpuUsage     float32
-	memUsage           float32
-	beforeMemUsage     float32
-	diskUsage          float32
-	beforeDiskUsage    float32
-	tcpConnUsage       float32
-	beforeTcpConnUsage float32
+	nodeName                string
+	cpuUsage                float32
+	before1DayCpuUsage      float32
+	before1WeekCpuUsage     float32
+	memUsage                float32
+	before1DayMemUsage      float32
+	before1WeekMemUsage     float32
+	diskUsage               float32
+	before1DayDiskUsage     float32
+	before1WeekDiskUsage    float32
+	tcpConnUsage            float32
+	before1DayTcpConnUsage  float32
+	before1WeekTcpConnUsage float32
 }
 
 type NodeOutputMessage struct {
@@ -38,7 +42,7 @@ func NewNodeOutputMessage(job, instance, nodeName, alertMessage string, alertMet
 }
 
 func (n *NodeOutputMessage) Print() string {
-	return fmt.Sprintf("主机指标异常 >>> job: %s, instance: %s, 主机名:%s, 告警信息:%s, 当前值:%f, 预警值：%f\n", n.job, n.instance, n.nodeName, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit)
+	return fmt.Sprintf("主机指标异常 >>> job: %s, instance: %s, 主机名:%s, 告警信息:%s, 当前值:%.2f, 预警值：%.2f\n", n.job, n.instance, n.nodeName, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit)
 }
 
 func (b *NodeMetrics) GetJob() string {
@@ -69,64 +73,103 @@ func (sr *NodeMetrics) Filter() (string, bool) {
 		}
 		return (b - a) / a * 100
 	}
-	cpuInc := increaseRate(sr.beforeCpuUsage, sr.cpuUsage)
-	memInc := increaseRate(sr.beforeMemUsage, sr.memUsage)
-	diskInc := increaseRate(sr.beforeDiskUsage, sr.diskUsage)
-	tcpConnInc := increaseRate(sr.beforeTcpConnUsage, sr.tcpConnUsage)
+	cpuInc1Day := increaseRate(sr.before1DayCpuUsage, sr.cpuUsage)
+	cpuInc1Week := increaseRate(sr.before1WeekCpuUsage, sr.cpuUsage)
+	memInc1Day := increaseRate(sr.before1DayMemUsage, sr.memUsage)
+	memInc1Week := increaseRate(sr.before1WeekMemUsage, sr.memUsage)
+	diskInc1Day := increaseRate(sr.before1DayDiskUsage, sr.diskUsage)
+	diskInc1Week := increaseRate(sr.before1WeekDiskUsage, sr.diskUsage)
+	tcpConnInc1Day := increaseRate(sr.before1DayTcpConnUsage, sr.tcpConnUsage)
+	tcpConnInc1Week := increaseRate(sr.before1WeekTcpConnUsage, sr.tcpConnUsage)
 
 	if alertM, ok := rs.WithCpuRuleFilter(sr.cpuUsage)(sr.RuleItf); !ok {
 		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_LIMIT, alertM.(float32), sr.cpuUsage))
 
-		global.Logger.Info("cpu exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_usage", sr.cpuUsage))
+		global.Logger.Info(CPU_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_usage", sr.cpuUsage))
 		return CPU_LIMIT, false
 	}
-	if alertM, ok := rs.WithCpuIncreaseRuleFilter(cpuInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT, alertM.(float32), cpuInc))
 
-		global.Logger.Info("cpu rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_increase_usage", cpuInc))
-		return CPU_RATE_LIMIT, false
+	if alertM, ok := rs.WithCpuIncrease1DayRuleFilter(cpuInc1Day)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1DAY, alertM.(float32), cpuInc1Day))
+
+		global.Logger.Info(CPU_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_increase_usage_1day", cpuInc1Day))
+		return CPU_RATE_LIMIT_1DAY, false
 	}
+
+	if alertM, ok := rs.WithCpuIncrease1WeekRuleFilter(cpuInc1Week)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1WEEK, alertM.(float32), cpuInc1Week))
+
+		global.Logger.Info(CPU_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_increase_usage_1week", cpuInc1Week))
+		return CPU_RATE_LIMIT_1WEEK, false
+	}
+
 	if alertM, ok := rs.WithMemRuleFilter(sr.memUsage)(sr.RuleItf); !ok {
 		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_LIMIT, alertM.(float32), sr.memUsage))
 
 		global.Logger.Info("mem exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_usage", sr.memUsage))
 		return MEM_LIMIT, false
 	}
-	if alertM, ok := rs.WithMemIncreaseRuleFilter(memInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT, alertM.(float32), memInc))
 
-		global.Logger.Info("mem rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_increase_usage", memInc))
-		return MEM_RATE_LIMIT, false
+	if alertM, ok := rs.WithMemIncrease1DayRuleFilter(memInc1Day)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1DAY, alertM.(float32), memInc1Day))
+
+		global.Logger.Info(MEM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_increase_usage_1day", memInc1Day))
+		return MEM_RATE_LIMIT_1DAY, false
 	}
+
+	if alertM, ok := rs.WithMemIncrease1WeekRuleFilter(memInc1Week)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1WEEK, alertM.(float32), memInc1Week))
+
+		global.Logger.Info(MEM_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_increase_usage_1week", memInc1Week))
+		return MEM_RATE_LIMIT_1WEEK, false
+	}
+
 	if alertM, ok := rs.WithDiskRuleFilter(sr.diskUsage)(sr.RuleItf); !ok {
 		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_LIMIT, alertM.(float32), sr.diskUsage))
 
 		global.Logger.Info("disk exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_usage", sr.diskUsage))
 		return DISK_LIMIT, false
 	}
-	if alertM, ok := rs.WithDiskIncreaseRuleFilter(diskInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT, alertM.(float32), diskInc))
 
-		global.Logger.Info("disk rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_increase_usage", diskInc))
-		return DISK_RATE_LIMIT, false
+	if alertM, ok := rs.WithDiskIncrease1DayRuleFilter(diskInc1Day)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1DAY, alertM.(float32), diskInc1Day))
+
+		global.Logger.Info(DISK_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_increase_usage_1day", diskInc1Day))
+		return DISK_RATE_LIMIT_1DAY, false
 	}
+
+	if alertM, ok := rs.WithDiskIncrease1WeekRuleFilter(diskInc1Week)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1WEEK, alertM.(float32), diskInc1Week))
+
+		global.Logger.Info(DISK_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_increase_usage_1week", diskInc1Week))
+		return DISK_RATE_LIMIT_1WEEK, false
+	}
+
 	if alertM, ok := rs.WithTcpConnRuleFilter(sr.tcpConnUsage)(sr.RuleItf); !ok {
 		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_LIMIT, alertM.(float32), sr.tcpConnUsage))
 
 		global.Logger.Info("tcp conn counts exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_counts", sr.tcpConnUsage))
 		return TCP_CONN_LIMIT, false
 	}
-	if alertM, ok := rs.WithTcpConnIncreaseRuleFilter(tcpConnInc)(sr.RuleItf); !ok {
-		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT, alertM.(float32), tcpConnInc))
 
-		global.Logger.Info("tcp conn counts rate exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts", tcpConnInc))
-		return TCP_CONN_RATE_LIMIT, false
+	if alertM, ok := rs.WithTcpConnIncrease1DayRuleFilter(tcpConnInc1Day)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1DAY, alertM.(float32), tcpConnInc1Day))
+
+		global.Logger.Info(TCP_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts_1day", tcpConnInc1Day))
+		return TCP_CONN_RATE_LIMIT_1DAY, false
+	}
+
+	if alertM, ok := rs.WithTcpConnIncrease1WeekRuleFilter(tcpConnInc1Week)(sr.RuleItf); !ok {
+		nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1WEEK, alertM.(float32), tcpConnInc1Week))
+
+		global.Logger.Info(TCP_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts_1day", tcpConnInc1Week))
+		return TCP_CONN_RATE_LIMIT_1WEEK, false
 	}
 	return "", true
 }
 
 func (sr *NodeMetrics) Print() string {
-	return fmt.Sprintf("## job: %s,nodeName: %s,instance: %s,cpuUsage: %f,cpuUsageBefore: %f,memUsage: %f,memUsageBefore: %f,diskUsage: %f,diskUsageBefore: %f,tcpConns: %f,tcpConnsBefore: %f", sr.job, sr.nodeName, sr.instance, sr.cpuUsage, sr.beforeCpuUsage, sr.memUsage, sr.beforeMemUsage, sr.diskUsage, sr.beforeDiskUsage, sr.tcpConnUsage, sr.beforeTcpConnUsage)
+	return fmt.Sprintf("## job: %s,nodeName: %s,instance: %s,cpuUsage: %.2f,cpuUsageBefore1Day: %.2f,cpuUsageBefore1Week: %.2f,memUsage: %.2f,memUsageBefore1Day: %.2f,memUsageBefore1Week: %.2f,diskUsage: %.2f,diskUsageBefore1Day: %.2f,diskUsageBefore1Week: %.2f,tcpConns: %.2f,tcpConnsBefore1Day: %.2f,tcpConnsBefore1Week: %.2f", sr.job, sr.nodeName, sr.instance, sr.cpuUsage, sr.before1DayCpuUsage, sr.before1WeekCpuUsage, sr.memUsage, sr.before1DayMemUsage, sr.before1WeekMemUsage, sr.diskUsage, sr.before1DayDiskUsage, sr.before1WeekDiskUsage, sr.tcpConnUsage, sr.before1DayTcpConnUsage, sr.before1WeekTcpConnUsage)
 }
 func WithNodeJob(job string) MetricsOption {
 	return func(sr MetricsItf) {
@@ -143,9 +186,14 @@ func WithCpuUsage(cpuUsage float32) MetricsOption {
 		sr.(*NodeMetrics).cpuUsage = cpuUsage
 	}
 }
-func WithBeforeCpuUsage(beforeCpuUsage float32) MetricsOption {
+func WithBefore1DayCpuUsage(beforeCpuUsage float32) MetricsOption {
 	return func(sr MetricsItf) {
-		sr.(*NodeMetrics).beforeCpuUsage = beforeCpuUsage
+		sr.(*NodeMetrics).before1DayCpuUsage = beforeCpuUsage
+	}
+}
+func WithBefore1WeekCpuUsage(beforeCpuUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).before1WeekCpuUsage = beforeCpuUsage
 	}
 }
 func WithMemUsage(memUsage float32) MetricsOption {
@@ -153,9 +201,14 @@ func WithMemUsage(memUsage float32) MetricsOption {
 		sr.(*NodeMetrics).memUsage = memUsage
 	}
 }
-func WithBeforeMemUsage(beforeMemUsage float32) MetricsOption {
+func WithBefore1DayMemUsage(beforeMemUsage float32) MetricsOption {
 	return func(sr MetricsItf) {
-		sr.(*NodeMetrics).beforeMemUsage = beforeMemUsage
+		sr.(*NodeMetrics).before1DayMemUsage = beforeMemUsage
+	}
+}
+func WithBefore1WeekMemUsage(beforeMemUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).before1WeekMemUsage = beforeMemUsage
 	}
 }
 func WithDiskUsage(diskUsage float32) MetricsOption {
@@ -163,9 +216,14 @@ func WithDiskUsage(diskUsage float32) MetricsOption {
 		sr.(*NodeMetrics).diskUsage = diskUsage
 	}
 }
-func WithBeforeDiskUsage(beforeDiskUsage float32) MetricsOption {
+func WithBefore1DayDiskUsage(beforeDiskUsage float32) MetricsOption {
 	return func(sr MetricsItf) {
-		sr.(*NodeMetrics).beforeDiskUsage = beforeDiskUsage
+		sr.(*NodeMetrics).before1DayDiskUsage = beforeDiskUsage
+	}
+}
+func WithBefore1WeekDiskUsage(beforeDiskUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).before1WeekDiskUsage = beforeDiskUsage
 	}
 }
 func WithTcpConnUsage(tcpConnUsage float32) MetricsOption {
@@ -173,9 +231,14 @@ func WithTcpConnUsage(tcpConnUsage float32) MetricsOption {
 		sr.(*NodeMetrics).tcpConnUsage = tcpConnUsage
 	}
 }
-func WithBeforeTcpConnUsage(beforeTcpConnUsage float32) MetricsOption {
+func WithBefore1DayTcpConnUsage(beforeTcpConnUsage float32) MetricsOption {
 	return func(sr MetricsItf) {
-		sr.(*NodeMetrics).beforeTcpConnUsage = beforeTcpConnUsage
+		sr.(*NodeMetrics).before1DayTcpConnUsage = beforeTcpConnUsage
+	}
+}
+func WithBefore1WeekTcpConnUsage(beforeTcpConnUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*NodeMetrics).before1WeekTcpConnUsage = beforeTcpConnUsage
 	}
 }
 func NewNodeMetrics(instance string, options ...MetricsOption) *NodeMetrics {
