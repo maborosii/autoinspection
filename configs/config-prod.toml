@@ -6,7 +6,11 @@ metrics = "cpu_usage_percents"
 promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m]))by(instance))*100"
 
 [[monitoritems]]
-metrics = "cpu_usage_percents_before"
+metrics = "cpu_usage_percents_before_1day"
+promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m] offset 1d))by(instance))*100"
+
+[[monitoritems]]
+metrics = "cpu_usage_percents_before_1week"
 promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m] offset 1w))by(instance))*100"
 
 [[monitoritems]]
@@ -14,7 +18,11 @@ metrics = "mem_usage_percents"
 promql = "(1-(node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes))* 100"
 
 [[monitoritems]]
-metrics = "mem_usage_percents_before"
+metrics = "mem_usage_percents_before_1day"
+promql = "(1-((node_memory_MemAvailable_bytes offset 1d)/node_memory_MemTotal_bytes))* 100"
+
+[[monitoritems]]
+metrics = "mem_usage_percents_before_1week"
 promql = "(1-((node_memory_MemAvailable_bytes offset 1w)/node_memory_MemTotal_bytes))* 100"
 
 [[monitoritems]]
@@ -22,7 +30,11 @@ metrics = "disk_usage_percents"
 promql = "max((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"})*100/(node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"}+(node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"})))by(instance)"
 
 [[monitoritems]]
-metrics = "disk_usage_percents_before"
+metrics = "disk_usage_percents_before_1day"
+promql = "max(((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1d)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1d)) *100/((node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"} offset 1d)+((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1d)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1d))))by(instance)"
+
+[[monitoritems]]
+metrics = "disk_usage_percents_before_1week"
 promql = "max(((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1w)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1w)) *100/((node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"} offset 1w)+((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1w)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1w))))by(instance)"
 
 [[monitoritems]]
@@ -30,30 +42,42 @@ metrics = "tcp_conn_counts"
 promql = "node_netstat_Tcp_CurrEstab-0"
 
 [[monitoritems]]
-metrics = "tcp_conn_counts_before"
+metrics = "tcp_conn_counts_before_1day"
+promql = "(node_netstat_Tcp_CurrEstab offset 1d)-0"
+
+[[monitoritems]]
+metrics = "tcp_conn_counts_before_1week"
 promql = "(node_netstat_Tcp_CurrEstab offset 1w)-0"
 
 [rules]
     [[rules.node]]
     job = "Redis组"
     cpu = 55
-    cpuIncrease = 10
+    cpuIncrease1Day = 10
+    cpuIncrease1Week = 10
     mem = 60
-    memIncrease = 10
+    memIncrease1Day = 10
+    memIncrease1Week = 10
     disk = 80
-    diskIncrease = 10
+    diskIncrease1Day = 10
+    diskIncrease1Week = 10
     tcpConn = 1000
-    tcpConnIncrease = 10
+    tcpConnIncrease1Day = 10
+    tcpConnIncrease1Week = 10
     [[rules.node]]
     job = "netty-iot"
     cpu = 35
-    cpuIncrease = 10
+    cpuIncrease1Day = 10
+    cpuIncrease1Week = 10
     mem = 60
-    memIncrease = 10
+    memIncrease1Day = 10
+    memIncrease1Week = 10
     disk = 80
-    diskIncrease = 10
+    diskIncrease1Day = 10
+    diskIncrease1Week = 10
     tcpConn = 1000
-    tcpConnIncrease = 10
+    tcpConnIncrease1Day = 10
+    tcpConnIncrease1Week = 10
 
 [logconfig]
 level = "debug"
