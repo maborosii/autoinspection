@@ -1,53 +1,114 @@
-address = "http://prometheus:9090"
 timeout = 10
+[endpoints]
+node = "http://prometheus:9091"
+redis = "http://prometheus:9090"
+kafka = "http://prometheus:9094"
+es = "http://prometheus:9095"
 
 [[monitoritems]]
+type = "node"
 metrics = "cpu_usage_percents"
 promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m]))by(instance))*100"
 
 [[monitoritems]]
+type = "node"
 metrics = "cpu_usage_percents_before_1day"
 promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m] offset 1d))by(instance))*100"
 
 [[monitoritems]]
+type = "node"
 metrics = "cpu_usage_percents_before_1week"
 promql = "(1-avg(rate(node_cpu_seconds_total{mode=\"idle\"}[2m] offset 1w))by(instance))*100"
 
 [[monitoritems]]
+type = "node"
 metrics = "mem_usage_percents"
 promql = "(1-(node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes))* 100"
 
 [[monitoritems]]
+type = "node"
 metrics = "mem_usage_percents_before_1day"
 promql = "(1-((node_memory_MemAvailable_bytes offset 1d)/node_memory_MemTotal_bytes))* 100"
 
 [[monitoritems]]
+type = "node"
 metrics = "mem_usage_percents_before_1week"
 promql = "(1-((node_memory_MemAvailable_bytes offset 1w)/node_memory_MemTotal_bytes))* 100"
 
 [[monitoritems]]
+type = "node"
 metrics = "disk_usage_percents"
 promql = "max((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"})*100/(node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"}+(node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"})))by(instance)"
 
 [[monitoritems]]
+type = "node"
 metrics = "disk_usage_percents_before_1day"
 promql = "max(((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1d)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1d)) *100/((node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"} offset 1d)+((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1d)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1d))))by(instance)"
 
 [[monitoritems]]
+type = "node"
 metrics = "disk_usage_percents_before_1week"
 promql = "max(((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1w)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1w)) *100/((node_filesystem_avail_bytes{fstype=~\"ext.?|xfs\"} offset 1w)+((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\"} offset 1w)-(node_filesystem_free_bytes{fstype=~\"ext.?|xfs\"} offset 1w))))by(instance)"
 
 [[monitoritems]]
+type = "node"
 metrics = "tcp_conn_counts"
 promql = "node_netstat_Tcp_CurrEstab-0"
 
 [[monitoritems]]
+type = "node"
 metrics = "tcp_conn_counts_before_1day"
 promql = "(node_netstat_Tcp_CurrEstab offset 1d)-0"
 
 [[monitoritems]]
+type = "node"
 metrics = "tcp_conn_counts_before_1week"
 promql = "(node_netstat_Tcp_CurrEstab offset 1w)-0"
+
+[[monitoritems]]
+type = "redis"
+metrics = "redis_conn_counts"
+promql = "redis_connected_clients-0"
+
+[[monitoritems]]
+type = "redis"
+metrics = "redis_conn_counts_before_1day"
+promql = "(redis_connected_clients offset 1d)-0"
+
+[[monitoritems]]
+type = "redis"
+metrics = "redis_conn_counts_before_1week"
+promql = "(redis_connected_clients offset 1w)-0"
+
+# [[monitoritems]]
+# type = "kafka"
+# metrics = "redis_conn_counts"
+# promql = "redis_connected_clients-0"
+# 
+# [[monitoritems]]
+# type = "kafka"
+# metrics = "redis_conn_counts_before_1day"
+# promql = "(redis_connected_clients offset 1d)-0"
+# 
+# [[monitoritems]]
+# type = "kafka"
+# metrics = "redis_conn_counts_before_1week"
+# promql = "(redis_connected_clients offset 1w)-0"
+
+# [[monitoritems]]
+# type = "es"
+# metrics = "redis_conn_counts"
+# promql = "redis_connected_clients-0"
+# 
+# [[monitoritems]]
+# type = "es"
+# metrics = "redis_conn_counts_before_1day"
+# promql = "(redis_connected_clients offset 1d)-0"
+# 
+# [[monitoritems]]
+# type = "es"
+# metrics = "redis_conn_counts_before_1week"
+# promql = "(redis_connected_clients offset 1w)-0"
 
 [rules]
     [[rules.node]]
@@ -78,6 +139,23 @@ promql = "(node_netstat_Tcp_CurrEstab offset 1w)-0"
     tcpConn = 1000
     tcpConnIncrease1Day = 10
     tcpConnIncrease1Week = 10
+    [[rules.redis]]
+    job = "netty-iot"
+    conn = 35
+    connIncrease1Day = 10
+    connIncrease1Week = 10
+    # [[rules.kafka]]
+    # job = "netty-iot"
+    # conn = 35
+    # connIncrease1Day = 10
+    # connIncrease1Week = 10
+    # [[rules.es]]
+    # job = "netty-iot"
+    # conn = 35
+    # connIncrease1Day = 10
+    # connIncrease1Week = 10
+
+
 
 [logconfig]
 level = "debug"
@@ -85,5 +163,4 @@ logfile = "./logs/node_metrics.log"
 maxsize = 0
 maxage = 29
 maxbackups = 4
-
 

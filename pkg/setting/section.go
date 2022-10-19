@@ -1,7 +1,8 @@
 package setting
 
 type Config struct {
-	Address      string                   `toml:"address"`
+	// Address      string                   `toml:"address"`
+	Endpoints    map[string]string        `toml:"endpoints" mapstructure:"endpoints"`
 	TimeOut      int                      `toml:"timeout"`
 	MonitorItems MonitorItems             `toml:"monitoritems"`
 	Rules        map[string][]interface{} `toml:"rules" mapstructure:"rules"`
@@ -26,9 +27,7 @@ type LogConf struct {
 func (conf *Config) GetTimeOut() int {
 	return conf.TimeOut
 }
-func (conf *Config) GetAddress() string {
-	return conf.Address
-}
+
 func (conf *Config) GetMonitorItems() map[string]string {
 	return conf.MonitorItems.ConvertToMap()
 }
@@ -45,6 +44,7 @@ type MonitorItems []*MonitorItem
 type MonitorItem struct {
 	Metrics string `toml:"metrics"`
 	PromQL  string `toml:"promql"`
+	Type    string `toml:"type"`
 }
 
 func (i MonitorItems) ConvertToMap() map[string]string {

@@ -4,10 +4,6 @@ import (
 	"sync"
 )
 
-// 初始化时获取映射关系
-var instanceToNodeName = make(map[string]string, 400)
-var instanceToJob = make(map[string]string, 400)
-
 // 数据传输通道
 var metricsChan = make(chan *QueryResult)
 
@@ -25,5 +21,3 @@ var mapPattenForNode = `(?m)instance="(.*?)".*\sjob="(.*?)".*\snodename="(.*?)".
 // 正则表达式匹配模式 --> 筛选出 intance 和 value
 // 获取指标值的正则
 var valuePattern = `(?m)instance="(.*?)".*\s=>\s*(\d*\.?\d{0,2}).*$`
-
-var nodeOutputMessageList = make([]*NodeOutputMessage, 0, 2000)

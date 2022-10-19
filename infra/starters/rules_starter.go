@@ -5,7 +5,7 @@ import (
 	"log"
 	"node_metrics_go/global"
 	"node_metrics_go/infra"
-	rs "node_metrics_go/pkg/rules"
+	rs "node_metrics_go/internal/rules"
 	"node_metrics_go/pkg/setting"
 
 	"github.com/mitchellh/mapstructure"

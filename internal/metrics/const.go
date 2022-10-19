@@ -1,4 +1,4 @@
-package etl
+package metrics
 
 const (
 	CPU_LIMIT                 string = "cpu exceeds the threshold"
@@ -13,4 +13,11 @@ const (
 	TCP_CONN_LIMIT            string = "tcp conn counts exceeds the threshold"
 	TCP_CONN_RATE_LIMIT_1DAY  string = "tcp conn counts increase rate exceeds the threshold in one day"
 	TCP_CONN_RATE_LIMIT_1WEEK string = "tcp conn counts increase rate exceeds the threshold in one week"
+)
+const (
+	NODE_METRICS          string = "node"
+	REDIS_METRICS         string = "redis"
+	KAFKA_METRICS         string = "kafka"
+	RABBITMQ_METRICS      string = "rabbitmq"
+	ELASTICSEARCH_METRICS string = "es"
 )

@@ -22,7 +22,7 @@ func TestMonitorConfig_GetTimeOut(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			conf := &Config{
-				Address:      tt.fields.Address,
+				// Address:      tt.fields.Address,
 				TimeOut:      tt.fields.TimeOut,
 				MonitorItems: tt.fields.Items,
 				Rules:        tt.fields.Rules,

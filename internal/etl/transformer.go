@@ -2,13 +2,14 @@ package etl
 
 import (
 	"node_metrics_go/global"
+	"node_metrics_go/internal/metrics"
 	"strconv"
 
 	"go.uber.org/zap"
 )
 
 // 将返回的结果进行转换
-func ShuffleResult(series int, storeResults *MetricsMap) {
+func ShuffleResult(series int, storeResults *metrics.MetricsMap) {
 	defer WgReceiver.Done()
 	for i := 0; i < series; i++ {
 		queryResult := <-metricsChan
@@ -22,29 +23,29 @@ func ShuffleResult(series int, storeResults *MetricsMap) {
 			newValue := float32(value)
 			switch queryResult.GetLabel() {
 			case "cpu_usage_percents":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithCpuUsage(newValue))
 			case "cpu_usage_percents_before_1day":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1DayCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayCpuUsage(newValue))
 			case "cpu_usage_percents_before_1week":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1WeekCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekCpuUsage(newValue))
 			case "mem_usage_percents":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithMemUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithMemUsage(newValue))
 			case "mem_usage_percents_before_1day":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1DayMemUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayMemUsage(newValue))
 			case "mem_usage_percents_before_1week":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1WeekMemUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekMemUsage(newValue))
 			case "disk_usage_percents":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithDiskUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithDiskUsage(newValue))
 			case "disk_usage_percents_before_1day":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1DayDiskUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayDiskUsage(newValue))
 			case "disk_usage_percents_before_1week":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1WeekDiskUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekDiskUsage(newValue))
 			case "tcp_conn_counts":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithTcpConnUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithTcpConnUsage(newValue))
 			case "tcp_conn_counts_before_1day":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1DayTcpConnUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayTcpConnUsage(newValue))
 			case "tcp_conn_counts_before_1week":
-				storeResults.CreateOrModify(result[0], NewNodeMetrics(result[0]), WithBefore1WeekTcpConnUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekTcpConnUsage(newValue))
 			default:
 				global.Logger.Info("NOT FOUND IN USE METRICS LABEL")
 			}

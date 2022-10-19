@@ -2,13 +2,11 @@ package etl
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"time"
 
 	"node_metrics_go/global"
 
-	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 	"go.uber.org/zap"
@@ -33,13 +31,16 @@ func (q *QueryResult) GetValue() model.Value {
 }
 
 // 用于初始化获取 instance，job，nodename之间的映射关系
-func (q *QueryResult) InitInstanceMap() {
+func (q *QueryResult) InitInstanceMap() (map[string]string, map[string]string) {
+	instanceToNodeName := make(map[string]string, 400)
+	instanceToJob := make(map[string]string, 400)
 	var re = regexp.MustCompile(mapPattenForNode)
 	matched := re.FindAllStringSubmatch(q.value.String(), -1)
 	for _, match := range matched {
 		instanceToJob[match[1]] = match[2]
 		instanceToNodeName[match[1]] = match[3]
 	}
+	return instanceToJob, instanceToNodeName
 }
 
 // pattern: 正则表达式
@@ -54,18 +55,6 @@ func (q *QueryResult) CleanValue(pattern string) [][]string {
 	return midResult
 }
 
-func ClientForProm(address string) v1.API {
-	client, err := api.NewClient(api.Config{
-		Address: address,
-	})
-	if err != nil {
-		global.Logger.Fatal("Error creating client: ", zap.Error(err))
-	}
-	v1api := v1.NewAPI(client)
-	return v1api
-}
-
-// 发送查询结果到通道中
 func SendQueryResultToChan(label string, promql string, api v1.API) {
 	defer func() {
 		<-concurrencyChan
@@ -89,13 +78,4 @@ func QueryFromProm(label string, promql string, api v1.API) *QueryResult {
 		global.Logger.Warn("warning ", zap.Any("warnings: ", warnings))
 	}
 	return NewQueryResult()(label, result)
-}
-
-func QueryFromPromDemo(promql string, api v1.API) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	fmt.Println(promql)
-	result, _, _ := api.Query(ctx, promql, time.Now())
-
-	fmt.Printf("%v\n", result.String())
 }

@@ -1,12 +1,11 @@
-package etl
+package metrics
 
 import (
-	"fmt"
 	"node_metrics_go/global"
+
 	ph "node_metrics_go/internal/pusher"
 	"node_metrics_go/internal/pusher/mail"
-
-	rs "node_metrics_go/pkg/rules"
+	rs "node_metrics_go/internal/rules"
 
 	"go.uber.org/zap"
 )
@@ -17,6 +16,9 @@ type BaseMetrics struct {
 	instance string
 	rs.RuleItf
 }
+type AlertInfo interface {
+	PrintAlert() string
+}
 
 // 指标接口
 type MetricsItf interface {
@@ -24,7 +26,7 @@ type MetricsItf interface {
 	GetInstance() string
 	Print() string
 	AdaptRules(rs.RuleItf)
-	Filter() (string, bool)
+	Filter(chan<- AlertInfo) (string, bool)
 }
 
 func (b *BaseMetrics) GetJob() string {
@@ -46,13 +48,13 @@ func (m MetricsMap) CreateOrModify(key string, t MetricsItf, opts ...MetricsOpti
 		opt(m[key])
 	}
 }
-func (m MetricsMap) MapToJobAndNodeName() {
+func (m MetricsMap) MapToJobAndNodeName(instanceToJob, instanceToNodeName map[string]string) {
 	for k, v := range m {
 		if _, ok := instanceToJob[k]; !ok {
-			global.Logger.Warn("in instance to job mapping, ", zap.String("key", k))
+			global.Logger.Warn("this instance not found in job mapping, ", zap.String("key", k))
 		}
 		if _, ok := instanceToNodeName[k]; !ok {
-			global.Logger.Warn("in instance to nodeName mapping, ", zap.String("key", k))
+			global.Logger.Warn("this instance not found in nodeName mapping, ", zap.String("key", k))
 		}
 		switch v.(type) {
 		case *NodeMetrics:
@@ -65,6 +67,7 @@ func (m MetricsMap) MapToJobAndNodeName() {
 	}
 }
 
+// 映射告警规则
 func (m MetricsMap) MapToRules() {
 	for _, v := range m {
 		metricsJob := v.GetJob()
@@ -75,19 +78,37 @@ func (m MetricsMap) MapToRules() {
 		v.AdaptRules(global.NotifyRules[metricsJob])
 	}
 }
-func (m MetricsMap) Notify() {
-	for _, v := range m {
-		if str, ok := v.Filter(); !ok {
-			global.Logger.Debug(str, zap.String("metrics", v.Print()))
+
+// 合并告警信息
+func MergeAlertInfo(a <-chan AlertInfo) string {
+	var mm string
+	var alertInfoByKind map[string]string
+	for v := range a {
+		switch v.(type) {
+		case *NodeOutputMessage:
+			alertInfoByKind["node"] += v.PrintAlert()
+		default:
+			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert()))
 		}
 	}
-	fmt.Println(len(nodeOutputMessageList))
-	var mailMessage string
-	for _, v := range nodeOutputMessageList {
-		mailMessage += v.Print()
+	for _, infos := range alertInfoByKind {
+		mm += infos
 	}
+	return mm
+}
+
+func (m MetricsMap) Notify() {
+	var alertMessageChan = make(chan AlertInfo, 10)
+	for _, v := range m {
+		go func(v MetricsItf) {
+			if str, ok := v.Filter(alertMessageChan); !ok {
+				global.Logger.Debug(str, zap.String("metrics", v.Print()))
+			}
+		}(v)
+	}
+	mailMessage := MergeAlertInfo(alertMessageChan)
 	mm := mail.NewMailMessage(mailMessage)
-	if len(nodeOutputMessageList) != 0 {
+	if mailMessage != "" {
 		ph.PusherList.Exec(mm)
 	}
 }
