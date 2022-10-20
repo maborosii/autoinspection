@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"node_metrics_go/global"
+	"sync"
 
 	ph "node_metrics_go/internal/pusher"
 	"node_metrics_go/internal/pusher/mail"
@@ -9,6 +10,8 @@ import (
 
 	"go.uber.org/zap"
 )
+
+var wgForStopChan sync.WaitGroup
 
 // 公有指标
 type BaseMetrics struct {
@@ -82,7 +85,7 @@ func (m MetricsMap) MapToRules() {
 // 合并告警信息
 func MergeAlertInfo(a <-chan AlertInfo) string {
 	var mm string
-	var alertInfoByKind map[string]string
+	alertInfoByKind := make(map[string]string, 5)
 	for v := range a {
 		switch v.(type) {
 		case *NodeOutputMessage:
@@ -100,12 +103,21 @@ func MergeAlertInfo(a <-chan AlertInfo) string {
 func (m MetricsMap) Notify() {
 	var alertMessageChan = make(chan AlertInfo, 10)
 	for _, v := range m {
+		// 并发处理规则匹配
+		wgForStopChan.Add(1)
 		go func(v MetricsItf) {
+			defer wgForStopChan.Done()
 			if str, ok := v.Filter(alertMessageChan); !ok {
 				global.Logger.Debug(str, zap.String("metrics", v.Print()))
 			}
 		}(v)
 	}
+	// 用于关闭通道
+	go func() {
+		wgForStopChan.Wait()
+		close(alertMessageChan)
+	}()
+
 	mailMessage := MergeAlertInfo(alertMessageChan)
 	mm := mail.NewMailMessage(mailMessage)
 	if mailMessage != "" {
