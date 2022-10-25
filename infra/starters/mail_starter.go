@@ -21,7 +21,7 @@ func (d *MailStarter) Setup(conf *setting.Config) {
 func (d *MailStarter) setupMail(conf *setting.Config) {
 	log.Println("init Mail setting ...")
 	global.Mailer = conf.MailConfig
-	log.Println("%v", global.Mailer)
+	// log.Println("%v", global.Mailer)
 	m := email.NewMail(global.Mailer.Host, global.Mailer.Port)
 	m.Login(global.Mailer.UserName, global.Mailer.Password)
 	ph.PusherList.RegisterPusher(&mai.MailPusher{

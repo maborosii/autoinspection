@@ -15,6 +15,11 @@ const (
 	TCP_CONN_RATE_LIMIT_1WEEK string = "tcp conn counts increase rate exceeds the threshold in one week"
 )
 const (
+	// NODE_METRICS          global.MetricType  = "node"
+	// REDIS_METRICS         global.MetricType  = "redis"
+	// KAFKA_METRICS         global.MetricType  = "kafka"
+	// RABBITMQ_METRICS      global.MetricType  = "rabbitmq"
+	// ELASTICSEARCH_METRICS global.MMetricType = "node"
 	NODE_METRICS          string = "node"
 	REDIS_METRICS         string = "redis"
 	KAFKA_METRICS         string = "kafka"

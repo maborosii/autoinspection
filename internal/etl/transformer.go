@@ -9,10 +9,8 @@ import (
 )
 
 // 将返回的结果进行转换
-func ShuffleResult(series int, storeResults *metrics.MetricsMap) {
-	defer WgReceiver.Done()
-	for i := 0; i < series; i++ {
-		queryResult := <-metricsChan
+func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) {
+	for queryResult := range mChan {
 		results := queryResult.CleanValue(valuePattern)
 		for _, result := range results {
 			value, err := strconv.ParseFloat(result[1], 32)
@@ -51,5 +49,4 @@ func ShuffleResult(series int, storeResults *metrics.MetricsMap) {
 			}
 		}
 	}
-	// close(notifyChan)
 }

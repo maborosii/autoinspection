@@ -55,14 +55,13 @@ func (q *QueryResult) CleanValue(pattern string) [][]string {
 	return midResult
 }
 
-func SendQueryResultToChan(label string, promql string, api v1.API) {
+func SendQueryResultToChan(label string, promql string, api v1.API, mChan chan<- *QueryResult) {
 	defer func() {
 		<-concurrencyChan
 	}()
 	concurrencyChan <- struct{}{}
-	metricsChan <- QueryFromProm(label, promql, api)
+	mChan <- QueryFromProm(label, promql, api)
 	global.Logger.Info("metics gotten", zap.String("label", label))
-	// <-notifyChan
 }
 
 func QueryFromProm(label string, promql string, api v1.API) *QueryResult {

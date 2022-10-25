@@ -1,6 +1,7 @@
 *.log
 logs/
 .vscode/
+# hiden sensitive infomation
 monitor.toml
 config.toml
 email_test.go

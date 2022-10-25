@@ -1,5 +1,6 @@
 package setting
 
+type MetricType string
 type Config struct {
 	// Address      string                   `toml:"address"`
 	Endpoints    map[string]string        `toml:"endpoints" mapstructure:"endpoints"`
@@ -28,9 +29,9 @@ func (conf *Config) GetTimeOut() int {
 	return conf.TimeOut
 }
 
-func (conf *Config) GetMonitorItems() map[string]string {
-	return conf.MonitorItems.ConvertToMap()
-}
+// func (conf *Config) GetMonitorItems() map[string]string {
+// 	return conf.MonitorItems.ConvertToMap()
+// }
 func (conf *Config) GetLogConfig() *LogConf {
 	return conf.LogConfig
 }
@@ -44,16 +45,17 @@ type MonitorItems []*MonitorItem
 type MonitorItem struct {
 	Metrics string `toml:"metrics"`
 	PromQL  string `toml:"promql"`
-	Type    string `toml:"type"`
+	// 从哪个数据源查询数据
+	Endpoint []string `toml:"endpoint"`
 }
 
-func (i MonitorItems) ConvertToMap() map[string]string {
-	promQLs := make(map[string]string)
-	for _, item := range i {
-		promQLs[item.Metrics] = item.PromQL
-	}
-	return promQLs
-}
+// func (i MonitorItems) ConvertToMap() map[string]string {
+// 	promQLs := make(map[string]string)
+// 	for _, item := range i {
+// 		promQLs[item.Metrics] = item.PromQL
+// 	}
+// 	return promQLs
+// }
 
 // 将配置文件数据映射到结构体中
 func (s *Setting) ReadConfig(value interface{}) error {
