@@ -30,19 +30,6 @@ func (q *QueryResult) GetValue() model.Value {
 	return q.value
 }
 
-// 用于初始化获取 instance，job，nodename之间的映射关系
-func (q *QueryResult) InitInstanceMap() (map[string]string, map[string]string) {
-	instanceToNodeName := make(map[string]string, 400)
-	instanceToJob := make(map[string]string, 400)
-	var re = regexp.MustCompile(mapPattenForNode)
-	matched := re.FindAllStringSubmatch(q.value.String(), -1)
-	for _, match := range matched {
-		instanceToJob[match[1]] = match[2]
-		instanceToNodeName[match[1]] = match[3]
-	}
-	return instanceToJob, instanceToNodeName
-}
-
 // pattern: 正则表达式
 // 抽取instance，label，metrics
 func (q *QueryResult) CleanValue(pattern string) [][]string {

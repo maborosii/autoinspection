@@ -16,6 +16,11 @@ var (
 	Mailer         *setting.MailConf
 )
 
-var PromQLForMap = "node_uname_info - 0"
+var PromQLForNodeInfo = "node_uname_info - 0"
+var PromQLForRedisInfo = "redis_instance_info - 0"
+
+// var PromQLForKafkaInfo = "redis_instance_info - 0"
+// var PromQLForEsInfo = "redis_instance_info - 0"
+
 var NotifyRules = make(map[string]rs.RuleItf, 100)
 var PromClients = make(map[string]v1.API, 10)

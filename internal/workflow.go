@@ -19,10 +19,22 @@ var wgSender sync.WaitGroup
 // 数据传输通道
 
 func WorkFlow() {
-	// 存储最终指标
 	var nodeStoreResults = make(metrics.MetricsMap)
 	var metricsChan = make(chan *etl.QueryResult)
-	nodeInToJob, nodeInToNodename := etl.QueryFromProm("init", global.PromQLForMap, global.PromClients["node"]).InitInstanceMap()
+
+	// 初始化映射关系
+	nodeInToJob, nodeInToNodename := etl.QueryFromProm("init", global.PromQLForNodeInfo, global.PromClients[metrics.NODE_METRICS]).NodeInitInstanceMap()
+	redisInToJob := etl.QueryFromProm("init", global.PromQLForRedisInfo, global.PromClients[metrics.REDIS_METRICS]).RedisInitInstanceMap()
+	mergeMap := func(mObj ...map[string]string) map[string]string {
+		newObj := map[string]string{}
+		for _, m := range mObj {
+			for k, v := range m {
+				newObj[k] = v
+			}
+		}
+		return newObj
+	}
+	allInToJob := mergeMap(nodeInToJob, redisInToJob)
 
 	// 查询具体指标
 	// for label, sql := range global.MonitorSetting.GetMonitorItems() {
@@ -53,7 +65,7 @@ func WorkFlow() {
 	}()
 	wgReceiver.Wait()
 
-	nodeStoreResults.MapToJobAndNodeName(nodeInToJob, nodeInToNodename)
+	nodeStoreResults.MapToJobAndNodeName(allInToJob, nodeInToNodename)
 	nodeStoreResults.MapToRules()
 	nodeStoreResults.Notify()
 }

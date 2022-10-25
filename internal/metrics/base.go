@@ -56,11 +56,11 @@ func (m MetricsMap) MapToJobAndNodeName(instanceToJob, instanceToNodeName map[st
 		if _, ok := instanceToJob[k]; !ok {
 			global.Logger.Warn("this instance not found in job mapping, ", zap.String("key", k))
 		}
-		if _, ok := instanceToNodeName[k]; !ok {
-			global.Logger.Warn("this instance not found in nodeName mapping, ", zap.String("key", k))
-		}
 		switch v.(type) {
 		case *NodeMetrics:
+			if _, ok := instanceToNodeName[k]; !ok {
+				global.Logger.Warn("this instance not found in nodeName mapping, ", zap.String("key", k))
+			}
 			WithNodeJob(instanceToJob[k])(v)
 			WithNodeName(instanceToNodeName[k])(v)
 			global.Logger.Debug("mapping instance to nodeName and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))

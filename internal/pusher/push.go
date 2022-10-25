@@ -48,13 +48,13 @@ func (p *PushList) Exec(om message.OutMessage) {
 		go func(om message.OutMessage, pp Pusher) {
 			defer func() {
 				if err := recover(); err != nil {
-					global.Logger.Error("push action in pusherlist occurred error", zap.Any("error", err))
+					global.Logger.Error("push action in pusherList occurred error", zap.Any("error", err))
 				}
 			}()
 			defer w.Done()
 			err := pp.Push(om)
 			if err != nil {
-				global.Logger.Error("it occurs error when push messgae", zap.Error(err))
+				global.Logger.Error("it occurs error when push message", zap.Error(err))
 			}
 		}(om, pp)
 	}
