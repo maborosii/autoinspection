@@ -1,6 +1,7 @@
 package metrics
 
 const (
+	// node alert message
 	CPU_LIMIT                 string = "cpu exceeds the threshold"
 	CPU_RATE_LIMIT_1DAY       string = "cpu increase rate exceeds the threshold in one day"
 	CPU_RATE_LIMIT_1WEEK      string = "cpu increase rate exceeds the threshold in one week"
@@ -13,6 +14,11 @@ const (
 	TCP_CONN_LIMIT            string = "tcp conn counts exceeds the threshold"
 	TCP_CONN_RATE_LIMIT_1DAY  string = "tcp conn counts increase rate exceeds the threshold in one day"
 	TCP_CONN_RATE_LIMIT_1WEEK string = "tcp conn counts increase rate exceeds the threshold in one week"
+
+	// redis alert message
+	REDIS_CONN_LIMIT            string = "redis conn counts exceeds the threshold"
+	REDIS_CONN_RATE_LIMIT_1DAY  string = "redis conn counts increase rate exceeds the threshold in one day"
+	REDIS_CONN_RATE_LIMIT_1WEEK string = "redis conn counts increase rate exceeds the threshold in one week"
 )
 const (
 	// NODE_METRICS          global.MetricType  = "node"
