@@ -3,9 +3,9 @@ package metrics
 import (
 	"fmt"
 	"node_metrics_go/global"
+	am "node_metrics_go/internal/alert"
 	rs "node_metrics_go/internal/rules"
 
-	"github.com/jedib0t/go-pretty/v6/table"
 	"go.uber.org/zap"
 )
 
@@ -14,28 +14,6 @@ type RedisMetrics struct {
 	connsUsage            float32
 	before1DayConnsUsage  float32
 	before1WeekConnsUsage float32
-}
-
-type RedisOutputMessage struct {
-	job, instance, alertMessage          string
-	alertMetricsLimit, alertMetricsUsage float32
-}
-
-func NewRedisOutputMessage(job, instance, alertMessage string, alertMetricsLimit, alertMetricsUsage float32) *RedisOutputMessage {
-	return &RedisOutputMessage{
-		job:               job,
-		instance:          instance,
-		alertMessage:      alertMessage,
-		alertMetricsLimit: alertMetricsLimit,
-		alertMetricsUsage: alertMetricsUsage,
-	}
-}
-
-func (n *RedisOutputMessage) PrintAlert() string {
-	return fmt.Sprintf("Redis 指标异常 >>> job: %s, instance: %s,  告警信息:%s, 当前值:%.2f, 预警值：%.2f\n", n.job, n.instance, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit)
-}
-func (n *RedisOutputMessage) PrintAlertFormatTable() table.Row {
-	return table.Row{"Redis 指标异常", n.job, n.instance, "", n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit}
 }
 
 func (b *RedisMetrics) GetJob() string {
@@ -54,7 +32,7 @@ func (sr *RedisMetrics) AdaptRules(r rs.RuleItf) {
 }
 
 // 指标过滤
-func (sr *RedisMetrics) Filter(alertMsgChan chan<- AlertInfo) (string, bool) {
+func (sr *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 	// 若该指标项未匹配到规则
 	if sr.RuleItf == nil {
 		return "", true
@@ -69,24 +47,29 @@ func (sr *RedisMetrics) Filter(alertMsgChan chan<- AlertInfo) (string, bool) {
 	connsInc1Day := increaseRate(sr.before1DayConnsUsage, sr.connsUsage)
 	connsInc1Week := increaseRate(sr.before1WeekConnsUsage, sr.connsUsage)
 
-	if alertM, ok := rs.WithRedisConnsRuleFilter(sr.connsUsage)(sr.RuleItf); !ok {
-		alertMsgChan <- NewRedisOutputMessage(sr.GetJob(), sr.instance, REDIS_CONN_LIMIT, alertM.(float32), sr.connsUsage)
-		global.Logger.Info(REDIS_CONN_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_usage", sr.connsUsage))
-		return REDIS_CONN_LIMIT, false
+	/* 一周增长率过滤
+	 */
+	if alertM, ok := rs.WithRedisConnsIncrease1WeekRuleFilter(connsInc1Week)(sr.RuleItf); !ok {
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1WEEK, alertM.(float32), connsInc1Week)
+		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_increase_usage_1week", connsInc1Week))
+		return REDIS_CONN_RATE_LIMIT_1WEEK, false
 	}
-
+	/* 一天增长率过滤
+	 */
 	if alertM, ok := rs.WithRedisConnsIncrease1DayRuleFilter(connsInc1Day)(sr.RuleItf); !ok {
-		alertMsgChan <- NewRedisOutputMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1DAY, alertM.(float32), connsInc1Day)
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1DAY, alertM.(float32), connsInc1Day)
 		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_increase_usage_1day", connsInc1Day))
 		return REDIS_CONN_RATE_LIMIT_1DAY, false
 	}
 
-	if alertM, ok := rs.WithRedisConnsIncrease1WeekRuleFilter(connsInc1Week)(sr.RuleItf); !ok {
-		alertMsgChan <- NewRedisOutputMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1WEEK, alertM.(float32), connsInc1Week)
-		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_increase_usage_1week", connsInc1Week))
-		return REDIS_CONN_RATE_LIMIT_1WEEK, false
-	}
+	/* 瞬时值过滤
+	 */
 
+	if alertM, ok := rs.WithRedisConnsRuleFilter(sr.connsUsage)(sr.RuleItf); !ok {
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_LIMIT, alertM.(float32), sr.connsUsage)
+		global.Logger.Info(REDIS_CONN_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_usage", sr.connsUsage))
+		return REDIS_CONN_LIMIT, false
+	}
 	return "", true
 }
 

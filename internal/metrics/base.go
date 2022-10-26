@@ -1,15 +1,13 @@
 package metrics
 
 import (
-	"fmt"
 	"node_metrics_go/global"
 	"sync"
 
+	am "node_metrics_go/internal/alert"
 	ph "node_metrics_go/internal/pusher"
 	"node_metrics_go/internal/pusher/mail"
 	rs "node_metrics_go/internal/rules"
-
-	"github.com/jedib0t/go-pretty/v6/table"
 
 	"go.uber.org/zap"
 )
@@ -22,10 +20,6 @@ type BaseMetrics struct {
 	instance string
 	rs.RuleItf
 }
-type AlertInfo interface {
-	PrintAlert() string
-	PrintAlertFormatTable() table.Row
-}
 
 // 指标接口
 type MetricsItf interface {
@@ -33,7 +27,7 @@ type MetricsItf interface {
 	GetInstance() string
 	Print() string
 	AdaptRules(rs.RuleItf)
-	Filter(chan<- AlertInfo) (string, bool)
+	Filter(chan<- am.AlertInfo) (string, bool)
 }
 
 func (b *BaseMetrics) GetJob() string {
@@ -91,66 +85,8 @@ func (m MetricsMap) MapToRules() {
 	}
 }
 
-// 合并告警信息
-// 文本信息
-func mergeAlertInfo(a <-chan AlertInfo) string {
-	var mm string
-	alertInfoByKind := make(map[string]string, 5)
-	for v := range a {
-		switch v.(type) {
-		case *NodeOutputMessage:
-			alertInfoByKind["node"] += v.PrintAlert()
-		case *RedisOutputMessage:
-			alertInfoByKind["redis"] += v.PrintAlert()
-		default:
-			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert()))
-		}
-	}
-	for _, infos := range alertInfoByKind {
-		mm += infos
-	}
-	return mm
-}
-
-// 表格信息
-func mergeAlertInfoFormatTable(a <-chan AlertInfo) []table.Row {
-	var mm []table.Row
-	alertInfoByKind := make(map[string][]table.Row, 5)
-	for v := range a {
-		switch v.(type) {
-		case *NodeOutputMessage:
-			alertInfoByKind["node"] = append(alertInfoByKind["node"], v.PrintAlertFormatTable())
-		case *RedisOutputMessage:
-			alertInfoByKind["redis"] = append(alertInfoByKind["redis"], v.PrintAlertFormatTable())
-		default:
-			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert()))
-		}
-	}
-	for _, infos := range alertInfoByKind {
-		mm = append(mm, infos...)
-	}
-	return mm
-}
-
-// render table to html
-func renderTable(rows []table.Row) string {
-	t := table.NewWriter()
-	t.AppendHeader(tableHeader)
-	t.AppendRows(rows)
-	t.Style().HTML = table.HTMLOptions{
-		CSSClass:    "",
-		EmptyColumn: "&nbsp;",
-		EscapeText:  true,
-		Newline:     "<br/>",
-	}
-
-	prefixMailHtml := fmt.Sprintf("<style>\n%s\n</style>\n", styleCss)
-	htmlContext := prefixMailHtml + t.RenderHTML()
-	return htmlContext
-}
-
 func (m MetricsMap) Notify() {
-	var alertMessageChan = make(chan AlertInfo, 10)
+	var alertMessageChan = make(chan am.AlertInfo, 10)
 
 	for _, v := range m {
 		// 并发处理规则匹配
@@ -171,8 +107,8 @@ func (m MetricsMap) Notify() {
 	// mailMessage := MergeAlertInfo(alertMessageChan)
 	// mm := mail.NewMailMessage(mailMessage)
 
-	tableRows := mergeAlertInfoFormatTable(alertMessageChan)
-	mailMessage := renderTable(tableRows)
+	tableRows := am.MergeAlertInfoFormatTable(alertMessageChan)
+	mailMessage := am.renderTable(tableRows)
 	mm := mail.NewMailMessage(mailMessage)
 	if mailMessage != "" {
 		ph.PusherList.Exec(mm)

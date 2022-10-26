@@ -3,9 +3,9 @@ package metrics
 import (
 	"fmt"
 	"node_metrics_go/global"
+	am "node_metrics_go/internal/alert"
 	rs "node_metrics_go/internal/rules"
 
-	"github.com/jedib0t/go-pretty/v6/table"
 	"go.uber.org/zap"
 )
 
@@ -26,29 +26,6 @@ type NodeMetrics struct {
 	before1WeekTcpConnUsage float32
 }
 
-type NodeOutputMessage struct {
-	job, instance, nodeName, alertMessage string
-	alertMetricsLimit, alertMetricsUsage  float32
-}
-
-func NewNodeOutputMessage(job, instance, nodeName, alertMessage string, alertMetricsLimit, alertMetricsUsage float32) *NodeOutputMessage {
-	return &NodeOutputMessage{
-		job:               job,
-		instance:          instance,
-		nodeName:          nodeName,
-		alertMessage:      alertMessage,
-		alertMetricsLimit: alertMetricsLimit,
-		alertMetricsUsage: alertMetricsUsage,
-	}
-}
-
-func (n *NodeOutputMessage) PrintAlert() string {
-	return fmt.Sprintf("主机指标异常 >>> job: %s, instance: %s, 主机名:%s, 告警信息:%s, 当前值:%.2f, 预警值：%.2f\n", n.job, n.instance, n.nodeName, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit)
-}
-func (n *NodeOutputMessage) PrintAlertFormatTable() table.Row {
-	return table.Row{"主机指标异常", n.job, n.instance, n.nodeName, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit}
-}
-
 func (b *NodeMetrics) GetJob() string {
 	return b.job
 }
@@ -65,7 +42,7 @@ func (sr *NodeMetrics) AdaptRules(r rs.RuleItf) {
 }
 
 // 指标过滤
-func (sr *NodeMetrics) Filter(alertMsgChan chan<- AlertInfo) (string, bool) {
+func (sr *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 	// 若该指标项未匹配到规则
 	if sr.RuleItf == nil {
 		return "", true
@@ -86,100 +63,90 @@ func (sr *NodeMetrics) Filter(alertMsgChan chan<- AlertInfo) (string, bool) {
 	tcpConnInc1Day := increaseRate(sr.before1DayTcpConnUsage, sr.tcpConnUsage)
 	tcpConnInc1Week := increaseRate(sr.before1WeekTcpConnUsage, sr.tcpConnUsage)
 
-	if alertM, ok := rs.WithCpuRuleFilter(sr.cpuUsage)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_LIMIT, alertM.(float32), sr.cpuUsage))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_LIMIT, alertM.(float32), sr.cpuUsage)
-
-		global.Logger.Info(CPU_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_usage", sr.cpuUsage))
-		return CPU_LIMIT, false
-	}
-
-	if alertM, ok := rs.WithCpuIncrease1DayRuleFilter(cpuInc1Day)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1DAY, alertM.(float32), cpuInc1Day))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1DAY, alertM.(float32), cpuInc1Day)
-
-		global.Logger.Info(CPU_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_increase_usage_1day", cpuInc1Day))
-		return CPU_RATE_LIMIT_1DAY, false
-	}
-
+	/* 一周增长率过滤
+	 */
 	if alertM, ok := rs.WithCpuIncrease1WeekRuleFilter(cpuInc1Week)(sr.RuleItf); !ok {
 		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1WEEK, alertM.(float32), cpuInc1Week))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1WEEK, alertM.(float32), cpuInc1Week)
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1WEEK, alertM.(float32), cpuInc1Week)
 		global.Logger.Info(CPU_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_increase_usage_1week", cpuInc1Week))
 		return CPU_RATE_LIMIT_1WEEK, false
 	}
-
-	if alertM, ok := rs.WithMemRuleFilter(sr.memUsage)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_LIMIT, alertM.(float32), sr.memUsage))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_LIMIT, alertM.(float32), sr.memUsage)
-
-		global.Logger.Info("mem exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_usage", sr.memUsage))
-		return MEM_LIMIT, false
-	}
-
-	if alertM, ok := rs.WithMemIncrease1DayRuleFilter(memInc1Day)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1DAY, alertM.(float32), memInc1Day))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1DAY, alertM.(float32), memInc1Day)
-
-		global.Logger.Info(MEM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_increase_usage_1day", memInc1Day))
-		return MEM_RATE_LIMIT_1DAY, false
-	}
-
 	if alertM, ok := rs.WithMemIncrease1WeekRuleFilter(memInc1Week)(sr.RuleItf); !ok {
 		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1WEEK, alertM.(float32), memInc1Week))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1WEEK, alertM.(float32), memInc1Week)
-
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1WEEK, alertM.(float32), memInc1Week)
 		global.Logger.Info(MEM_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_increase_usage_1week", memInc1Week))
 		return MEM_RATE_LIMIT_1WEEK, false
 	}
-
-	if alertM, ok := rs.WithDiskRuleFilter(sr.diskUsage)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_LIMIT, alertM.(float32), sr.diskUsage))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_LIMIT, alertM.(float32), sr.diskUsage)
-
-		global.Logger.Info("disk exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_usage", sr.diskUsage))
-		return DISK_LIMIT, false
+	if alertM, ok := rs.WithTcpConnIncrease1WeekRuleFilter(tcpConnInc1Week)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1WEEK, alertM.(float32), tcpConnInc1Week))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1WEEK, alertM.(float32), tcpConnInc1Week)
+		global.Logger.Info(TCP_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts_1day", tcpConnInc1Week))
+		return TCP_CONN_RATE_LIMIT_1WEEK, false
 	}
-
-	if alertM, ok := rs.WithDiskIncrease1DayRuleFilter(diskInc1Day)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1DAY, alertM.(float32), diskInc1Day))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1DAY, alertM.(float32), diskInc1Day)
-
-		global.Logger.Info(DISK_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_increase_usage_1day", diskInc1Day))
-		return DISK_RATE_LIMIT_1DAY, false
-	}
-
 	if alertM, ok := rs.WithDiskIncrease1WeekRuleFilter(diskInc1Week)(sr.RuleItf); !ok {
 		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1WEEK, alertM.(float32), diskInc1Week))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1WEEK, alertM.(float32), diskInc1Week)
-
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1WEEK, alertM.(float32), diskInc1Week)
 		global.Logger.Info(DISK_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_increase_usage_1week", diskInc1Week))
 		return DISK_RATE_LIMIT_1WEEK, false
 	}
 
+	/* 一天增长率过滤
+	 */
+	if alertM, ok := rs.WithCpuIncrease1DayRuleFilter(cpuInc1Day)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1DAY, alertM.(float32), cpuInc1Day))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_RATE_LIMIT_1DAY, alertM.(float32), cpuInc1Day)
+		global.Logger.Info(CPU_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_increase_usage_1day", cpuInc1Day))
+		return CPU_RATE_LIMIT_1DAY, false
+	}
+	if alertM, ok := rs.WithMemIncrease1DayRuleFilter(memInc1Day)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1DAY, alertM.(float32), memInc1Day))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_RATE_LIMIT_1DAY, alertM.(float32), memInc1Day)
+		global.Logger.Info(MEM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_increase_usage_1day", memInc1Day))
+		return MEM_RATE_LIMIT_1DAY, false
+	}
+	if alertM, ok := rs.WithTcpConnIncrease1DayRuleFilter(tcpConnInc1Day)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1DAY, alertM.(float32), tcpConnInc1Day))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1DAY, alertM.(float32), tcpConnInc1Day)
+		global.Logger.Info(TCP_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts_1day", tcpConnInc1Day))
+		return TCP_CONN_RATE_LIMIT_1DAY, false
+	}
+	if alertM, ok := rs.WithDiskIncrease1DayRuleFilter(diskInc1Day)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1DAY, alertM.(float32), diskInc1Day))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_RATE_LIMIT_1DAY, alertM.(float32), diskInc1Day)
+		global.Logger.Info(DISK_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_increase_usage_1day", diskInc1Day))
+		return DISK_RATE_LIMIT_1DAY, false
+	}
+
+	/*瞬时值过滤
+	 */
+	if alertM, ok := rs.WithCpuRuleFilter(sr.cpuUsage)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_LIMIT, alertM.(float32), sr.cpuUsage))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, CPU_LIMIT, alertM.(float32), sr.cpuUsage)
+		global.Logger.Info(CPU_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("cpu_usage", sr.cpuUsage))
+		return CPU_LIMIT, false
+	}
+
+	if alertM, ok := rs.WithMemRuleFilter(sr.memUsage)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_LIMIT, alertM.(float32), sr.memUsage))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, MEM_LIMIT, alertM.(float32), sr.memUsage)
+		global.Logger.Info("mem exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("mem_usage", sr.memUsage))
+		return MEM_LIMIT, false
+	}
+
 	if alertM, ok := rs.WithTcpConnRuleFilter(sr.tcpConnUsage)(sr.RuleItf); !ok {
 		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_LIMIT, alertM.(float32), sr.tcpConnUsage))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_LIMIT, alertM.(float32), sr.tcpConnUsage)
-
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_LIMIT, alertM.(float32), sr.tcpConnUsage)
 		global.Logger.Info("tcp conn counts exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_counts", sr.tcpConnUsage))
 		return TCP_CONN_LIMIT, false
 	}
 
-	if alertM, ok := rs.WithTcpConnIncrease1DayRuleFilter(tcpConnInc1Day)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1DAY, alertM.(float32), tcpConnInc1Day))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1DAY, alertM.(float32), tcpConnInc1Day)
-
-		global.Logger.Info(TCP_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts_1day", tcpConnInc1Day))
-		return TCP_CONN_RATE_LIMIT_1DAY, false
+	if alertM, ok := rs.WithDiskRuleFilter(sr.diskUsage)(sr.RuleItf); !ok {
+		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_LIMIT, alertM.(float32), sr.diskUsage))
+		alertMsgChan <- am.NewNodeAlertMessage(sr.GetJob(), sr.instance, sr.nodeName, DISK_LIMIT, alertM.(float32), sr.diskUsage)
+		global.Logger.Info("disk exceeds the threshold", zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("disk_usage", sr.diskUsage))
+		return DISK_LIMIT, false
 	}
 
-	if alertM, ok := rs.WithTcpConnIncrease1WeekRuleFilter(tcpConnInc1Week)(sr.RuleItf); !ok {
-		// nodeOutputMessageList = append(nodeOutputMessageList, NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1WEEK, alertM.(float32), tcpConnInc1Week))
-		alertMsgChan <- NewNodeOutputMessage(sr.GetJob(), sr.instance, sr.nodeName, TCP_CONN_RATE_LIMIT_1WEEK, alertM.(float32), tcpConnInc1Week)
-
-		global.Logger.Info(TCP_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("tcp_conn_increase_counts_1day", tcpConnInc1Week))
-		return TCP_CONN_RATE_LIMIT_1WEEK, false
-	}
 	return "", true
 }
 
