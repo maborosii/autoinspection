@@ -16,8 +16,6 @@ var wgReceiver sync.WaitGroup
 // 发送者组
 var wgSender sync.WaitGroup
 
-// 数据传输通道
-
 func WorkFlow() {
 	var nodeStoreResults = make(metrics.MetricsMap)
 	var metricsChan = make(chan *etl.QueryResult, 10)
