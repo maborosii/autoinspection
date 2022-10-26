@@ -23,16 +23,27 @@ func (d *RulesStarter) setupRules(conf *setting.Config) {
 	log.Println("init rules setting ...")
 	for tt, j := range conf.Rules {
 		// parse template config
-		if tt == "node" {
+		switch tt {
+		case "node":
 			for _, jj := range j {
 				nodeRule := new(rs.NodeRule)
 				err := mapstructure.Decode(jj, nodeRule)
 				if err != nil {
 					panic(fmt.Sprintf("mapstructure rules for node_rule occur error: %s", err))
 				}
-				// global.NotifyRules = append(global.NotifyRules, nodeRule)
 				global.NotifyRules[nodeRule.GetRuleJob()] = nodeRule
 			}
+		case "redis":
+			for _, jj := range j {
+				redisRule := new(rs.RedisRule)
+				err := mapstructure.Decode(jj, redisRule)
+				if err != nil {
+					panic(fmt.Sprintf("mapstructure rules for node_rule occur error: %s", err))
+				}
+				global.NotifyRules[redisRule.GetRuleJob()] = redisRule
+			}
+		default:
+			panic(fmt.Sprintf("not suitable rule type in config, rule.type: %s", tt))
 		}
 	}
 }

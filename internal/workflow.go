@@ -20,11 +20,12 @@ var wgSender sync.WaitGroup
 
 func WorkFlow() {
 	var nodeStoreResults = make(metrics.MetricsMap)
-	var metricsChan = make(chan *etl.QueryResult)
+	var metricsChan = make(chan *etl.QueryResult, 10)
 
 	// 初始化映射关系
 	nodeInToJob, nodeInToNodename := etl.QueryFromProm("init", global.PromQLForNodeInfo, global.PromClients[metrics.NODE_METRICS]).NodeInitInstanceMap()
 	redisInToJob := etl.QueryFromProm("init", global.PromQLForRedisInfo, global.PromClients[metrics.REDIS_METRICS]).RedisInitInstanceMap()
+
 	mergeMap := func(mObj ...map[string]string) map[string]string {
 		newObj := map[string]string{}
 		for _, m := range mObj {

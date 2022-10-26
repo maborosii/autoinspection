@@ -5,6 +5,7 @@ import (
 	"node_metrics_go/global"
 	rs "node_metrics_go/internal/rules"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"go.uber.org/zap"
 )
 
@@ -43,6 +44,9 @@ func NewNodeOutputMessage(job, instance, nodeName, alertMessage string, alertMet
 
 func (n *NodeOutputMessage) PrintAlert() string {
 	return fmt.Sprintf("主机指标异常 >>> job: %s, instance: %s, 主机名:%s, 告警信息:%s, 当前值:%.2f, 预警值：%.2f\n", n.job, n.instance, n.nodeName, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit)
+}
+func (n *NodeOutputMessage) PrintAlertFormatTable() table.Row {
+	return table.Row{"主机指标异常", n.job, n.instance, n.nodeName, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit}
 }
 
 func (b *NodeMetrics) GetJob() string {

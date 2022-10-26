@@ -5,6 +5,7 @@ import (
 	"node_metrics_go/global"
 	rs "node_metrics_go/internal/rules"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"go.uber.org/zap"
 )
 
@@ -20,8 +21,8 @@ type RedisOutputMessage struct {
 	alertMetricsLimit, alertMetricsUsage float32
 }
 
-func NewRedisOutputMessage(job, instance, alertMessage string, alertMetricsLimit, alertMetricsUsage float32) *NodeOutputMessage {
-	return &NodeOutputMessage{
+func NewRedisOutputMessage(job, instance, alertMessage string, alertMetricsLimit, alertMetricsUsage float32) *RedisOutputMessage {
+	return &RedisOutputMessage{
 		job:               job,
 		instance:          instance,
 		alertMessage:      alertMessage,
@@ -32,6 +33,9 @@ func NewRedisOutputMessage(job, instance, alertMessage string, alertMetricsLimit
 
 func (n *RedisOutputMessage) PrintAlert() string {
 	return fmt.Sprintf("Redis 指标异常 >>> job: %s, instance: %s,  告警信息:%s, 当前值:%.2f, 预警值：%.2f\n", n.job, n.instance, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit)
+}
+func (n *RedisOutputMessage) PrintAlertFormatTable() table.Row {
+	return table.Row{"Redis 指标异常", n.job, n.instance, "", n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit}
 }
 
 func (b *RedisMetrics) GetJob() string {

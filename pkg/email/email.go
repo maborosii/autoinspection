@@ -76,7 +76,8 @@ func (m *Mail) Send(subject, content string, toAddr []string, optfs ...MailSendO
 	s.SetHeader("From", m.username)
 	s.SetHeader("To", toAddr...)
 	s.SetHeader("Subject", subject)
-	s.SetBody("text/plain", content)
+	s.SetBody("text/html", content)
+	// s.SetBody("text/plain", content)
 
 	dialer := opt.dialerFact(m.host, m.port, m.username, m.password)
 	if err := dialer.DialAndSend(s); err != nil {

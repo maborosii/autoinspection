@@ -1,12 +1,15 @@
 package metrics
 
 import (
+	"fmt"
 	"node_metrics_go/global"
 	"sync"
 
 	ph "node_metrics_go/internal/pusher"
 	"node_metrics_go/internal/pusher/mail"
 	rs "node_metrics_go/internal/rules"
+
+	"github.com/jedib0t/go-pretty/v6/table"
 
 	"go.uber.org/zap"
 )
@@ -21,6 +24,7 @@ type BaseMetrics struct {
 }
 type AlertInfo interface {
 	PrintAlert() string
+	PrintAlertFormatTable() table.Row
 }
 
 // 指标接口
@@ -63,9 +67,14 @@ func (m MetricsMap) MapToJobAndNodeName(instanceToJob, instanceToNodeName map[st
 			}
 			WithNodeJob(instanceToJob[k])(v)
 			WithNodeName(instanceToNodeName[k])(v)
-			global.Logger.Debug("mapping instance to nodeName and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("[nodeMetrics] mapping instance to nodeName and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+
+		case *RedisMetrics:
+			WithRedisJob(instanceToJob[k])(v)
+			global.Logger.Debug("[redisMetrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+
 		default:
-			global.Logger.Info("unknown type for MetricsItf")
+			global.Logger.Warn("unknown type for MetricsItf")
 		}
 	}
 }
@@ -83,13 +92,16 @@ func (m MetricsMap) MapToRules() {
 }
 
 // 合并告警信息
-func MergeAlertInfo(a <-chan AlertInfo) string {
+// 文本信息
+func mergeAlertInfo(a <-chan AlertInfo) string {
 	var mm string
 	alertInfoByKind := make(map[string]string, 5)
 	for v := range a {
 		switch v.(type) {
 		case *NodeOutputMessage:
 			alertInfoByKind["node"] += v.PrintAlert()
+		case *RedisOutputMessage:
+			alertInfoByKind["redis"] += v.PrintAlert()
 		default:
 			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert()))
 		}
@@ -100,8 +112,46 @@ func MergeAlertInfo(a <-chan AlertInfo) string {
 	return mm
 }
 
+// 表格信息
+func mergeAlertInfoFormatTable(a <-chan AlertInfo) []table.Row {
+	var mm []table.Row
+	alertInfoByKind := make(map[string][]table.Row, 5)
+	for v := range a {
+		switch v.(type) {
+		case *NodeOutputMessage:
+			alertInfoByKind["node"] = append(alertInfoByKind["node"], v.PrintAlertFormatTable())
+		case *RedisOutputMessage:
+			alertInfoByKind["redis"] = append(alertInfoByKind["redis"], v.PrintAlertFormatTable())
+		default:
+			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert()))
+		}
+	}
+	for _, infos := range alertInfoByKind {
+		mm = append(mm, infos...)
+	}
+	return mm
+}
+
+// render table to html
+func renderTable(rows []table.Row) string {
+	t := table.NewWriter()
+	t.AppendHeader(tableHeader)
+	t.AppendRows(rows)
+	t.Style().HTML = table.HTMLOptions{
+		CSSClass:    "",
+		EmptyColumn: "&nbsp;",
+		EscapeText:  true,
+		Newline:     "<br/>",
+	}
+
+	prefixMailHtml := fmt.Sprintf("<style>\n%s\n</style>\n", styleCss)
+	htmlContext := prefixMailHtml + t.RenderHTML()
+	return htmlContext
+}
+
 func (m MetricsMap) Notify() {
 	var alertMessageChan = make(chan AlertInfo, 10)
+
 	for _, v := range m {
 		// 并发处理规则匹配
 		wgForStopChan.Add(1)
@@ -118,7 +168,11 @@ func (m MetricsMap) Notify() {
 		close(alertMessageChan)
 	}()
 
-	mailMessage := MergeAlertInfo(alertMessageChan)
+	// mailMessage := MergeAlertInfo(alertMessageChan)
+	// mm := mail.NewMailMessage(mailMessage)
+
+	tableRows := mergeAlertInfoFormatTable(alertMessageChan)
+	mailMessage := renderTable(tableRows)
 	mm := mail.NewMailMessage(mailMessage)
 	if mailMessage != "" {
 		ph.PusherList.Exec(mm)

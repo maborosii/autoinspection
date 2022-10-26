@@ -20,6 +20,8 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 			}
 			newValue := float32(value)
 			switch queryResult.GetLabel() {
+
+			// node metrics
 			case "cpu_usage_percents":
 				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithCpuUsage(newValue))
 			case "cpu_usage_percents_before_1day":
@@ -44,6 +46,15 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayTcpConnUsage(newValue))
 			case "tcp_conn_counts_before_1week":
 				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekTcpConnUsage(newValue))
+
+			// redis metrics
+			case "redis_conn_counts":
+				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithRedisConnsUsage(newValue))
+			case "redis_conn_counts_before_1day":
+				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1DayRedisConnsUsage(newValue))
+			case "redis_conn_counts_before_1week":
+				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1WeekRedisConnsUsage(newValue))
+
 			default:
 				global.Logger.Info("NOT FOUND IN USE METRICS LABEL")
 			}
