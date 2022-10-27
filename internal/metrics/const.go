@@ -19,7 +19,7 @@ const (
 	// cn
 	CPU_LIMIT                 string = "[node][cpu] 瞬时使用率超过阈值"
 	CPU_RATE_LIMIT_1DAY       string = "[node][cpu] 一天使用增长率超过阈值"
-	CPU_RATE_LIMIT_1WEEK      string = "[node][cpu] 一周使用增长率使用率"
+	CPU_RATE_LIMIT_1WEEK      string = "[node][cpu] 一周使用增长率超过阈值"
 	MEM_LIMIT                 string = "[node][内存] 瞬时使用率超过阈值"
 	MEM_RATE_LIMIT_1DAY       string = "[node][内存] 一天使用增长率超过阈值"
 	MEM_RATE_LIMIT_1WEEK      string = "[node][内存] 一周使用增长率超过阈值"
