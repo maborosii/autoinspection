@@ -5,6 +5,7 @@ import (
 	"node_metrics_go/global"
 	"node_metrics_go/internal/message"
 	mail "node_metrics_go/pkg/email"
+	"strings"
 )
 
 type MailMessage struct {
@@ -13,13 +14,6 @@ type MailMessage struct {
 	content string
 }
 
-// func (m *MailMessage) GetToAddr() []string {
-// 	return m.toAddr
-// }
-
-// func (m *MailMessage) GetSubject() string {
-// 	return m.subject
-// }
 func NewMailMessage(c string) *MailMessage {
 	return &MailMessage{
 		content: c,
@@ -46,8 +40,8 @@ func (p *MailPusher) Push(m message.OutMessage) error {
 	if !ok {
 		return fmt.Errorf("mail message asset failed")
 	}
-	if err := p.Mail.Send("主机巡检详情", mm.GetContent(), global.Mailer.To); err != nil {
-		// if err := p.Mail.Send(mm.GetSubject(), mm.GetContent(), mm.GetToAddr()); err != nil {
+	subject := strings.ToUpper(global.MetricsType) + "-" + global.Mailer.Subject
+	if err := p.Mail.Send(subject, mm.GetContent(), global.Mailer.To); err != nil {
 		return err
 	}
 	return nil

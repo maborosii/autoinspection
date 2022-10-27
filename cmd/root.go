@@ -12,5 +12,7 @@ func Execute() error {
 // 初始化，将子命令嵌入到根命令中
 func init() {
 	rootCmd.AddCommand(nodeCmd)
+	rootCmd.AddCommand(redisCmd)
+	rootCmd.AddCommand(allCmd)
 	rootCmd.AddCommand(versionCmd)
 }

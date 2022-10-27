@@ -15,6 +15,7 @@ var nodeCmd = &cobra.Command{
 	Long:  nodeDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		global.ConfigPath = nodeConfig
+		global.MetricsType = "node"
 	},
 }
 var nodeDesc = strings.Join([]string{

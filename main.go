@@ -27,7 +27,7 @@ func main() {
 	}
 	app := infra.NewBootApplication(confStruct)
 	app.Run()
-	internal.WorkFlow()
+	internal.WorkFlow(global.MetricsType)
 }
 
 func init() {

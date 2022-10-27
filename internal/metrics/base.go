@@ -108,7 +108,7 @@ func (m MetricsMap) Notify() {
 	// mm := mail.NewMailMessage(mailMessage)
 
 	tableRows := am.MergeAlertInfoFormatTable(alertMessageChan)
-	mailMessage := am.renderTable(tableRows)
+	mailMessage := am.RenderTable(tableRows)
 	mm := mail.NewMailMessage(mailMessage)
 	if mailMessage != "" {
 		ph.PusherList.Exec(mm)

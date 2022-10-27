@@ -20,6 +20,6 @@ func (d *PromClientsStarter) setupPromClients(conf *setting.Config) {
 	log.Println("init prometheus clients setting ...")
 	for tt, j := range conf.Endpoints {
 		log.Println(tt)
-		global.PromClients[tt] = prom.ClientForProm(j)
+		global.PromClients[tt] = prom.ClientForProm(j.Address)
 	}
 }

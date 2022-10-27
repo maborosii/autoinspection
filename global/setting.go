@@ -13,6 +13,7 @@ var (
 	MonitorSetting *setting.Config
 	Logger         *zap.Logger
 	ConfigPath     string
+	MetricsType    string
 	Mailer         *setting.MailConf
 )
 

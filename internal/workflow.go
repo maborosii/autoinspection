@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	"go.uber.org/zap"
 )
 
 // 意义不大 并发接收者并阻塞
@@ -15,29 +16,44 @@ var wgReceiver sync.WaitGroup
 
 // 发送者组
 var wgSender sync.WaitGroup
+var metricsChan = make(chan *etl.QueryResult, 10)
 
-func WorkFlow() {
-	var nodeStoreResults = make(metrics.MetricsMap)
-	var metricsChan = make(chan *etl.QueryResult, 10)
+func WorkFlow(mType string) {
 
-	// 初始化映射关系
-	nodeInToJob, nodeInToNodename := etl.QueryFromProm("init", global.PromQLForNodeInfo, global.PromClients[metrics.NODE_METRICS]).NodeInitInstanceMap()
-	redisInToJob := etl.QueryFromProm("init", global.PromQLForRedisInfo, global.PromClients[metrics.REDIS_METRICS]).RedisInitInstanceMap()
+	var storeResults = make(metrics.MetricsMap)
+	allInToJob, nodeInToNodeName := initAllMap(mType)
+	extractMetrics(mType)
 
-	mergeMap := func(mObj ...map[string]string) map[string]string {
-		newObj := map[string]string{}
-		for _, m := range mObj {
-			for k, v := range m {
-				newObj[k] = v
-			}
+	wgReceiver.Add(1)
+	// 转换数据
+	go func() {
+		defer wgReceiver.Done()
+		etl.ShuffleResult(metricsChan, &storeResults)
+	}()
+	wgReceiver.Wait()
+
+	storeResults.MapToJobAndNodeName(allInToJob, nodeInToNodeName)
+	storeResults.MapToRules()
+	storeResults.Notify()
+}
+
+func mergeMap(mObj ...map[string]string) map[string]string {
+	newObj := map[string]string{}
+	for _, m := range mObj {
+		for k, v := range m {
+			newObj[k] = v
 		}
-		return newObj
 	}
-	allInToJob := mergeMap(nodeInToJob, redisInToJob)
+	return newObj
+}
 
-	// 查询具体指标
-	// for label, sql := range global.MonitorSetting.GetMonitorItems() {
-	for _, monitorItem := range global.MonitorSetting.MonitorItems {
+func extractMetrics(metricType string) {
+	filterType := metricType
+	if metricType == "all" {
+		filterType = ""
+	}
+
+	for _, monitorItem := range global.MonitorSetting.MonitorItems.Filter(filterType) {
 		label := monitorItem.Metrics
 		sql := monitorItem.PromQL
 		eps := monitorItem.Endpoint
@@ -55,16 +71,40 @@ func WorkFlow() {
 		wgSender.Wait()
 		close(metricsChan)
 	}()
+}
 
-	wgReceiver.Add(1)
-	// 转换数据
-	go func() {
-		defer wgReceiver.Done()
-		etl.ShuffleResult(metricsChan, &nodeStoreResults)
-	}()
-	wgReceiver.Wait()
+// 聚合所有指标的映射关系
+func initAllMap(metricType string) (map[string]string, map[string]string) {
+	switch metricType {
+	case "all":
+		return initMetricMap("")
+	default:
+		return initMetricMap(metricType)
+	}
+}
 
-	nodeStoreResults.MapToJobAndNodeName(allInToJob, nodeInToNodename)
-	nodeStoreResults.MapToRules()
-	nodeStoreResults.Notify()
+// 生成不同类型指标的 instance -> job 映射关系
+func initMetricMap(metricType string) (map[string]string, map[string]string) {
+	var instanceToJob, instanceToNodeName map[string]string
+
+	// 从 monitorItems 找到对应的 endpoints 集合 (map[string]struct{})
+	for k := range global.MonitorSetting.MonitorItems.FindAdaptEndpoints(metricType) {
+		// 判断 endpoint 的指标类型
+		v := global.MonitorSetting.Endpoints[k].Type
+		// fmt.Println(v)
+		switch v {
+		case "node":
+			a, b := etl.QueryFromProm(fmt.Sprintf("init node, endpoint: %s", k), global.PromQLForNodeInfo, global.PromClients[k]).NodeInitInstanceMap()
+			instanceToJob = mergeMap(instanceToJob, a)
+			instanceToNodeName = mergeMap(instanceToNodeName, b)
+		case "redis":
+			c := etl.QueryFromProm(fmt.Sprintf("init redis, endpoint: %s", k), global.PromQLForRedisInfo, global.PromClients[metrics.REDIS_METRICS]).RedisInitInstanceMap()
+			instanceToJob = mergeMap(instanceToJob, c)
+		case "kafka":
+		case "es":
+		default:
+			global.Logger.Error("endpoint metric type is not in rules", zap.String("type", v))
+		}
+	}
+	return instanceToJob, instanceToNodeName
 }
