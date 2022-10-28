@@ -11,7 +11,7 @@ var redisConfig string
 
 var redisCmd = &cobra.Command{
 	Use:   "redis",
-	Short: "获取redis指标",
+	Short: "获取 redis 指标",
 	Long:  redisDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		global.ConfigPath = redisConfig
@@ -19,7 +19,7 @@ var redisCmd = &cobra.Command{
 	},
 }
 var redisDesc = strings.Join([]string{
-	"该子命令支持获取redis指标"}, "\n")
+	"该子命令支持获取 redis 指标"}, "\n")
 
 func init() {
 	// 参数分别表示，绑定的变量，参数长名(--str)，参数短名(-s)，默认内容，帮助信息

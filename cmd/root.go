@@ -13,6 +13,7 @@ func Execute() error {
 func init() {
 	rootCmd.AddCommand(nodeCmd)
 	rootCmd.AddCommand(redisCmd)
+	rootCmd.AddCommand(kafkaCmd)
 	rootCmd.AddCommand(allCmd)
 	rootCmd.AddCommand(versionCmd)
 }

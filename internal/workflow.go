@@ -5,6 +5,7 @@ import (
 	"node_metrics_go/global"
 	"node_metrics_go/internal/etl"
 	"node_metrics_go/internal/metrics"
+	"node_metrics_go/internal/utils"
 	"sync"
 
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
@@ -17,6 +18,11 @@ var wgReceiver sync.WaitGroup
 // 发送者组
 var wgSender sync.WaitGroup
 var metricsChan = make(chan *etl.QueryResult, 10)
+
+// promql for get mapping of
+var promQLForNodeInfo = "node_uname_info - 0"
+var promQLForRedisInfo = "redis_instance_info - 0"
+var promQLForKafkaInfo = "kafka_exporter_build_info - 0"
 
 func WorkFlow(mType string) {
 
@@ -35,16 +41,6 @@ func WorkFlow(mType string) {
 	storeResults.MapToJobAndNodeName(allInToJob, nodeInToNodeName)
 	storeResults.MapToRules()
 	storeResults.Notify()
-}
-
-func mergeMap(mObj ...map[string]string) map[string]string {
-	newObj := map[string]string{}
-	for _, m := range mObj {
-		for k, v := range m {
-			newObj[k] = v
-		}
-	}
-	return newObj
 }
 
 func extractMetrics(metricType string) {
@@ -91,19 +87,20 @@ func initMetricMap(metricType string) (map[string]string, map[string]string) {
 	for k := range global.MonitorSetting.MonitorItems.FindAdaptEndpoints(metricType) {
 		// 判断 endpoint 的指标类型
 		v := global.MonitorSetting.Endpoints[k].Type
-		// fmt.Println(v)
 		switch v {
 		case "node":
-			a, b := etl.QueryFromProm(fmt.Sprintf("init node, endpoint: %s", k), global.PromQLForNodeInfo, global.PromClients[k]).NodeInitInstanceMap()
-			instanceToJob = mergeMap(instanceToJob, a)
-			instanceToNodeName = mergeMap(instanceToNodeName, b)
+			a, b := etl.QueryFromProm(fmt.Sprintf("init node, endpoint: %s", k), promQLForNodeInfo, global.PromClients[k]).NodeInitInstanceMap()
+			instanceToJob = utils.MergeMap(instanceToJob, a)
+			instanceToNodeName = utils.MergeMap(instanceToNodeName, b)
 		case "redis":
-			c := etl.QueryFromProm(fmt.Sprintf("init redis, endpoint: %s", k), global.PromQLForRedisInfo, global.PromClients[metrics.REDIS_METRICS]).RedisInitInstanceMap()
-			instanceToJob = mergeMap(instanceToJob, c)
+			c := etl.QueryFromProm(fmt.Sprintf("init redis, endpoint: %s", k), promQLForRedisInfo, global.PromClients[k]).RedisInitInstanceMap()
+			instanceToJob = utils.MergeMap(instanceToJob, c)
 		case "kafka":
+			d := etl.QueryFromProm(fmt.Sprintf("init kafka, endpoint: %s", k), promQLForKafkaInfo, global.PromClients[k]).KafkaInitInstanceMap()
+			instanceToJob = utils.MergeMap(instanceToJob, d)
 		case "es":
 		default:
-			global.Logger.Error("endpoint metric type is not in rules", zap.String("type", v))
+			global.Logger.Error("endpoint's metric type is not supported", zap.String("type", v))
 		}
 	}
 	return instanceToJob, instanceToNodeName

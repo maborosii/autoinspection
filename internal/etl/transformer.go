@@ -15,7 +15,7 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 		for _, result := range results {
 			value, err := strconv.ParseFloat(result[1], 32)
 			if err != nil {
-				global.Logger.Error("Failed to convert value from string to float, err: ", zap.Error(err))
+				global.Logger.Error("Failed to convert value from string to float", zap.Error(err))
 				value = 0
 			}
 			newValue := float32(value)
@@ -54,6 +54,14 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1DayRedisConnsUsage(newValue))
 			case "redis_conn_counts_before_1week":
 				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1WeekRedisConnsUsage(newValue))
+
+			// kafka metrics
+			case "kafka_lag_sum":
+				storeResults.CreateOrModify(result[0], metrics.NewKafkaMetrics(result[0]), metrics.WithKafkaLagSumUsage(newValue))
+			case "kafka_lag_sum_before_1day":
+				storeResults.CreateOrModify(result[0], metrics.NewKafkaMetrics(result[0]), metrics.WithBefore1DayKafkaLagSumUsage(newValue))
+			case "kafka_lag_sum_before_1week":
+				storeResults.CreateOrModify(result[0], metrics.NewKafkaMetrics(result[0]), metrics.WithBefore1WeekKafkaLagSumUsage(newValue))
 
 			default:
 				global.Logger.Info("NOT FOUND IN USE METRICS LABEL")

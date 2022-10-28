@@ -61,11 +61,15 @@ func (m MetricsMap) MapToJobAndNodeName(instanceToJob, instanceToNodeName map[st
 			}
 			WithNodeJob(instanceToJob[k])(v)
 			WithNodeName(instanceToNodeName[k])(v)
-			global.Logger.Debug("[nodeMetrics] mapping instance to nodeName and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("[node metrics] mapping instance to nodeName and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
 		case *RedisMetrics:
 			WithRedisJob(instanceToJob[k])(v)
-			global.Logger.Debug("[redisMetrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("[redis metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+
+		case *KafkaMetrics:
+			WithKafkaJob(instanceToJob[k])(v)
+			global.Logger.Debug("[kafka metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
 		default:
 			global.Logger.Warn("unknown type for MetricsItf")

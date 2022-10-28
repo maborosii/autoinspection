@@ -6,6 +6,8 @@ import (
 	am "node_metrics_go/internal/alert"
 	rs "node_metrics_go/internal/rules"
 
+	ut "node_metrics_go/internal/utils"
+
 	"go.uber.org/zap"
 )
 
@@ -38,35 +40,29 @@ func (sr *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 		return "", true
 	}
 
-	increaseRate := func(a, b float32) float32 {
-		if a == 0 {
-			return 0
-		}
-		return (b - a) / a * 100
-	}
-	connsInc1Day := increaseRate(sr.before1DayConnsUsage, sr.connsUsage)
-	connsInc1Week := increaseRate(sr.before1WeekConnsUsage, sr.connsUsage)
+	connsInc1Day := ut.IncreaseRate(sr.before1DayConnsUsage, sr.connsUsage)
+	connsInc1Week := ut.IncreaseRate(sr.before1WeekConnsUsage, sr.connsUsage)
 
 	/* 一周增长率过滤
 	 */
 	if alertM, ok := rs.WithRedisConnsIncrease1WeekRuleFilter(connsInc1Week)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1WEEK, alertM.(float32), connsInc1Week)
-		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_increase_usage_1week", connsInc1Week))
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1WEEK, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", connsInc1Week))
+		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1week", fmt.Sprintf("%.2f%%", connsInc1Week)))
 		return REDIS_CONN_RATE_LIMIT_1WEEK, false
 	}
+
 	/* 一天增长率过滤
 	 */
 	if alertM, ok := rs.WithRedisConnsIncrease1DayRuleFilter(connsInc1Day)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1DAY, alertM.(float32), connsInc1Day)
-		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_increase_usage_1day", connsInc1Day))
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1DAY, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", connsInc1Day))
+		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1day", fmt.Sprintf("%.2f%%", connsInc1Day)))
 		return REDIS_CONN_RATE_LIMIT_1DAY, false
 	}
 
 	/* 瞬时值过滤
 	 */
-
 	if alertM, ok := rs.WithRedisConnsRuleFilter(sr.connsUsage)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_LIMIT, alertM.(float32), sr.connsUsage)
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_LIMIT, fmt.Sprintf("%.2f", alertM.(float32)), fmt.Sprintf("%.2f", sr.connsUsage))
 		global.Logger.Info(REDIS_CONN_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_usage", sr.connsUsage))
 		return REDIS_CONN_LIMIT, false
 	}

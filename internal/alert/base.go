@@ -21,10 +21,12 @@ func MergeAlertInfo(a <-chan AlertInfo) string {
 	alertInfoByKind := make(map[string]string, 5)
 	for v := range a {
 		switch v.(type) {
-		case *NodeAlertMessage:
+		case *nodeAlertMessage:
 			alertInfoByKind["node"] += v.PrintAlert()
-		case *RedisAlertMessage:
+		case *redisAlertMessage:
 			alertInfoByKind["redis"] += v.PrintAlert()
+		case *kafkaAlertMessage:
+			alertInfoByKind["kafka"] += v.PrintAlert()
 		default:
 			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert()))
 		}
@@ -41,10 +43,12 @@ func MergeAlertInfoFormatTable(a <-chan AlertInfo) []table.Row {
 	alertInfoByKind := make(map[string][]table.Row, 5)
 	for v := range a {
 		switch v.(type) {
-		case *NodeAlertMessage:
+		case *nodeAlertMessage:
 			alertInfoByKind["node"] = append(alertInfoByKind["node"], v.PrintAlertFormatTable())
-		case *RedisAlertMessage:
+		case *redisAlertMessage:
 			alertInfoByKind["redis"] = append(alertInfoByKind["redis"], v.PrintAlertFormatTable())
+		case *kafkaAlertMessage:
+			alertInfoByKind["kafka"] = append(alertInfoByKind["kafka"], v.PrintAlertFormatTable())
 		default:
 			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert()))
 		}
@@ -60,6 +64,7 @@ func RenderTable(rows []table.Row) string {
 	t := table.NewWriter()
 	t.AppendHeader(tableHeader)
 	t.AppendRows(rows)
+	t.SetAutoIndex(true)
 	t.Style().HTML = table.HTMLOptions{
 		CSSClass:    "",
 		EmptyColumn: "&nbsp;",

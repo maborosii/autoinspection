@@ -29,7 +29,7 @@ func (d *RulesStarter) setupRules(conf *setting.Config) {
 				nodeRule := new(rs.NodeRule)
 				err := mapstructure.Decode(jj, nodeRule)
 				if err != nil {
-					panic(fmt.Sprintf("mapstructure rules for node_rule occur error: %s", err))
+					panic(fmt.Sprintf("mapstructure rules for node occur error: %s", err))
 				}
 				global.NotifyRules[nodeRule.GetRuleJob()] = nodeRule
 			}
@@ -38,9 +38,18 @@ func (d *RulesStarter) setupRules(conf *setting.Config) {
 				redisRule := new(rs.RedisRule)
 				err := mapstructure.Decode(jj, redisRule)
 				if err != nil {
-					panic(fmt.Sprintf("mapstructure rules for node_rule occur error: %s", err))
+					panic(fmt.Sprintf("mapstructure rules for redis occur error: %s", err))
 				}
 				global.NotifyRules[redisRule.GetRuleJob()] = redisRule
+			}
+		case "kafka":
+			for _, jj := range j {
+				kafkaRule := new(rs.KafkaRule)
+				err := mapstructure.Decode(jj, kafkaRule)
+				if err != nil {
+					panic(fmt.Sprintf("mapstructure rules for kafka occur error: %s", err))
+				}
+				global.NotifyRules[kafkaRule.GetRuleJob()] = kafkaRule
 			}
 		default:
 			panic(fmt.Sprintf("not suitable rule type in config, rule.type: %s", tt))

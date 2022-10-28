@@ -16,7 +16,7 @@ func ClientForProm(address string) v1.API {
 		Address: address,
 	})
 	if err != nil {
-		global.Logger.Fatal("Error creating client: ", zap.Error(err))
+		global.Logger.Fatal("Error creating client", zap.Error(err))
 	}
 	v1api := v1.NewAPI(client)
 	return v1api

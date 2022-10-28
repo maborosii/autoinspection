@@ -11,7 +11,7 @@ var nodeConfig string
 
 var nodeCmd = &cobra.Command{
 	Use:   "node",
-	Short: "获取主机指标",
+	Short: "获取 node 指标",
 	Long:  nodeDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		global.ConfigPath = nodeConfig
@@ -19,7 +19,7 @@ var nodeCmd = &cobra.Command{
 	},
 }
 var nodeDesc = strings.Join([]string{
-	"该子命令支持获取主机指标"}, "\n")
+	"该子命令支持获取 node 指标"}, "\n")
 
 func init() {
 	// 参数分别表示，绑定的变量，参数长名(--str)，参数短名(-s)，默认内容，帮助信息
