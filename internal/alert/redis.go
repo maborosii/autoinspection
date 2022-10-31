@@ -5,7 +5,7 @@ type redisAlertMessage struct {
 	*baseAlertMessage
 }
 
-func NewRedisAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage string) *redisAlertMessage {
+func NewRedisAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage, now, before1Day, before1Week string) *redisAlertMessage {
 	// return &redisAlertMessage{
 	// 	job:               job,
 	// 	instance:          instance,
@@ -13,7 +13,7 @@ func NewRedisAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertM
 	// 	alertMetricsLimit: alertMetricsLimit,
 	// 	alertMetricsUsage: alertMetricsUsage,
 	// }
-	b := NewBaseAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage)
+	b := NewBaseAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage, now, before1Day, before1Week)
 	return &redisAlertMessage{
 		baseAlertMessage: b,
 	}

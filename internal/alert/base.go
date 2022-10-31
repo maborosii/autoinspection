@@ -13,24 +13,27 @@ type AlertInfo interface {
 	PrintAlertFormatTable(mType string) table.Row
 }
 type baseAlertMessage struct {
-	job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage string
+	job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage, metricsNow, metricsBefore1Day, metricsBefore1Week string
 }
 
-func NewBaseAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage string) *baseAlertMessage {
+func NewBaseAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage, now, before1Day, before1Week string) *baseAlertMessage {
 	return &baseAlertMessage{
-		job:               job,
-		instance:          instance,
-		alertMessage:      alertMessage,
-		alertMetricsLimit: alertMetricsLimit,
-		alertMetricsUsage: alertMetricsUsage,
+		job:                job,
+		instance:           instance,
+		alertMessage:       alertMessage,
+		alertMetricsLimit:  alertMetricsLimit,
+		alertMetricsUsage:  alertMetricsUsage,
+		metricsNow:         now,
+		metricsBefore1Day:  before1Day,
+		metricsBefore1Week: before1Week,
 	}
 }
 
 func (n *baseAlertMessage) PrintAlert(mType string) string {
-	return fmt.Sprintf("%s 指标异常 >>> job: %s, instance: %s,  告警信息:%s, 当前值:%s, 预警值：%.s\n", mType, n.job, n.instance, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit)
+	return fmt.Sprintf("%s 指标异常 >>> job: %s, instance: %s,  告警信息: %s, 当前值: %s, 预警值: %s, 指标值（当前）: %.2f%%, 指标值（一天前）: %.2f%%, 指标值（一周前）: %.2f%%\n", mType, n.job, n.instance, n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit, n.metricsNow, n.metricsBefore1Day, n.metricsBefore1Week)
 }
 func (n *baseAlertMessage) PrintAlertFormatTable(mType string) table.Row {
-	return table.Row{fmt.Sprintf("%s 指标异常", mType), n.job, n.instance, "", n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit}
+	return table.Row{fmt.Sprintf("%s 指标异常", mType), n.job, n.instance, "", n.alertMessage, n.alertMetricsUsage, n.alertMetricsLimit, n.metricsNow, n.metricsBefore1Day, n.metricsBefore1Week}
 }
 
 /* 合并告警信息

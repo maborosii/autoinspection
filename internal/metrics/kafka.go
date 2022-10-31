@@ -45,23 +45,38 @@ func (sr *KafkaMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 	/* 一周增长率过滤
 	 */
 	if alertM, ok := rs.WithKafkaLagSumIncrease1WeekRuleFilter(lagSumInc1Week)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewKafkaAlertMessage(sr.GetJob(), sr.instance, KAFKA_LAG_SUM_RATE_LIMIT_1WEEK, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", lagSumInc1Week))
-		global.Logger.Info(KAFKA_LAG_SUM_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("kafka_lag_sum_increase_usage_1week", fmt.Sprintf("%.2f%%", lagSumInc1Week)))
+		alertMsgChan <- am.NewKafkaAlertMessage(
+			sr.GetJob(), sr.instance, KAFKA_LAG_SUM_RATE_LIMIT_1WEEK,
+			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(lagSumInc1Week),
+			ut.FormatF(sr.lagSumUsage), ut.FormatF(sr.before1DayLagSumUsage),
+			ut.FormatF(sr.before1WeekLagSumUsage))
+
+		global.Logger.Info(KAFKA_LAG_SUM_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("kafka_lag_sum_increase_usage_1week", ut.FormatF2S(lagSumInc1Week)))
 		return KAFKA_LAG_SUM_RATE_LIMIT_1WEEK, false
 	}
 
 	/* 一天增长率过滤
 	 */
 	if alertM, ok := rs.WithKafkaLagSumIncrease1DayRuleFilter(lagSumInc1Day)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewKafkaAlertMessage(sr.GetJob(), sr.instance, KAFKA_LAG_SUM_RATE_LIMIT_1DAY, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", lagSumInc1Day))
-		global.Logger.Info(KAFKA_LAG_SUM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("kafka_lag_sum_increase_usage_1day", fmt.Sprintf("%.2f%%", lagSumInc1Day)))
+		alertMsgChan <- am.NewKafkaAlertMessage(
+			sr.GetJob(), sr.instance, KAFKA_LAG_SUM_RATE_LIMIT_1DAY,
+			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(lagSumInc1Day),
+			ut.FormatF(sr.lagSumUsage), ut.FormatF(sr.before1DayLagSumUsage),
+			ut.FormatF(sr.before1WeekLagSumUsage))
+
+		global.Logger.Info(KAFKA_LAG_SUM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("kafka_lag_sum_increase_usage_1day", ut.FormatF2S(lagSumInc1Day)))
 		return KAFKA_LAG_SUM_RATE_LIMIT_1DAY, false
 	}
 
 	/* 瞬时值过滤
 	 */
 	if alertM, ok := rs.WithKafkaLagSumRuleFilter(sr.lagSumUsage)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewKafkaAlertMessage(sr.GetJob(), sr.instance, KAFKA_LAG_SUM_LIMIT, fmt.Sprintf("%.2f", alertM.(float32)), fmt.Sprintf("%.2f", sr.lagSumUsage))
+		alertMsgChan <- am.NewKafkaAlertMessage(
+			sr.GetJob(), sr.instance, KAFKA_LAG_SUM_LIMIT,
+			ut.FormatF(alertM.(float32)), ut.FormatF(sr.lagSumUsage),
+			ut.FormatF(sr.lagSumUsage), ut.FormatF(sr.before1DayLagSumUsage),
+			ut.FormatF(sr.before1WeekLagSumUsage))
+
 		global.Logger.Info(KAFKA_LAG_SUM_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("kafka_lag_sum_usage", sr.lagSumUsage))
 		return KAFKA_LAG_SUM_LIMIT, false
 	}

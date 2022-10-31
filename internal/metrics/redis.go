@@ -51,39 +51,69 @@ func (sr *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 	/* 一周增长率过滤
 	 */
 	if alertM, ok := rs.WithRedisConnsIncrease1WeekRuleFilter(connsInc1Week)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1WEEK, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", connsInc1Week))
-		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1week", fmt.Sprintf("%.2f%%", connsInc1Week)))
+		alertMsgChan <- am.NewRedisAlertMessage(
+			sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1WEEK,
+			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(connsInc1Week),
+			ut.FormatF(sr.connsUsage), ut.FormatF(sr.before1DayConnsUsage),
+			ut.FormatF(sr.before1WeekConnsUsage))
+
+		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1week", ut.FormatF2S(connsInc1Week)))
 		return REDIS_CONN_RATE_LIMIT_1WEEK, false
 	}
 	if alertM, ok := rs.WithRedisMemIncrease1WeekRuleFilter(memInc1Week)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_MEM_RATE_LIMIT_1WEEK, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", memInc1Week))
-		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_increase_usage_1week", fmt.Sprintf("%.2f%%", memInc1Week)))
+		alertMsgChan <- am.NewRedisAlertMessage(
+			sr.GetJob(), sr.instance, REDIS_MEM_RATE_LIMIT_1WEEK,
+			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(memInc1Week),
+			ut.FormatF2S(sr.memUsage), ut.FormatF2S(sr.before1DayMemUsage),
+			ut.FormatF2S(sr.before1WeekMemUsage))
+
+		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_increase_usage_1week", ut.FormatF2S(memInc1Week)))
 		return REDIS_MEM_RATE_LIMIT_1WEEK, false
 	}
 
 	/* 一天增长率过滤
 	 */
 	if alertM, ok := rs.WithRedisConnsIncrease1DayRuleFilter(connsInc1Day)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1DAY, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", connsInc1Day))
-		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1day", fmt.Sprintf("%.2f%%", connsInc1Day)))
+		alertMsgChan <- am.NewRedisAlertMessage(
+			sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1DAY,
+			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(connsInc1Day),
+			ut.FormatF(sr.connsUsage), ut.FormatF(sr.before1DayConnsUsage),
+			ut.FormatF(sr.before1WeekConnsUsage))
+
+		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1day", ut.FormatF2S(connsInc1Day)))
 		return REDIS_CONN_RATE_LIMIT_1DAY, false
 	}
 	if alertM, ok := rs.WithRedisMemIncrease1DayRuleFilter(memInc1Day)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_MEM_RATE_LIMIT_1DAY, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", memInc1Day))
-		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_increase_usage_1day", fmt.Sprintf("%.2f%%", memInc1Day)))
+		alertMsgChan <- am.NewRedisAlertMessage(
+			sr.GetJob(), sr.instance, REDIS_MEM_RATE_LIMIT_1DAY,
+			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(memInc1Day),
+			ut.FormatF2S(sr.memUsage), ut.FormatF2S(sr.before1DayMemUsage),
+			ut.FormatF2S(sr.before1WeekMemUsage))
+
+		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_increase_usage_1day", ut.FormatF2S(memInc1Day)))
 		return REDIS_MEM_RATE_LIMIT_1DAY, false
 	}
 
 	/* 瞬时值过滤
 	 */
 	if alertM, ok := rs.WithRedisConnsRuleFilter(sr.connsUsage)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_LIMIT, fmt.Sprintf("%.2f", alertM.(float32)), fmt.Sprintf("%.2f", sr.connsUsage))
+		alertMsgChan <- am.NewRedisAlertMessage(
+			sr.GetJob(), sr.instance, REDIS_CONN_LIMIT,
+			ut.FormatF(alertM.(float32)), ut.FormatF(sr.connsUsage),
+			ut.FormatF(sr.connsUsage), ut.FormatF(sr.before1DayConnsUsage),
+			ut.FormatF(sr.before1WeekConnsUsage))
+
 		global.Logger.Info(REDIS_CONN_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_usage", sr.connsUsage))
 		return REDIS_CONN_LIMIT, false
 	}
 	if alertM, ok := rs.WithRedisMemRuleFilter(sr.memUsage)(sr.RuleItf); !ok {
-		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_MEM_LIMIT, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", sr.memUsage))
-		global.Logger.Info(REDIS_MEM_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_usage", fmt.Sprintf("%.2f%%", sr.memUsage)))
+		alertMsgChan <- am.NewRedisAlertMessage(
+			sr.GetJob(), sr.instance, REDIS_MEM_LIMIT,
+			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(sr.memUsage),
+			ut.FormatF2S(sr.memUsage), ut.FormatF2S(sr.before1DayMemUsage),
+			ut.FormatF2S(sr.before1WeekMemUsage))
+
+		global.Logger.Info(REDIS_MEM_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_usage", ut.FormatF2S(sr.memUsage)))
 		return REDIS_MEM_LIMIT, false
 	}
 

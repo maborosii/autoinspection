@@ -5,7 +5,7 @@ type kafkaAlertMessage struct {
 	*baseAlertMessage
 }
 
-func NewKafkaAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage string) *kafkaAlertMessage {
+func NewKafkaAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage, now, before1Day, before1Week string) *kafkaAlertMessage {
 	// return &kafkaAlertMessage{
 	// 	job:               job,
 	// 	instance:          instance,
@@ -13,7 +13,7 @@ func NewKafkaAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertM
 	// 	alertMetricsLimit: alertMetricsLimit,
 	// 	alertMetricsUsage: alertMetricsUsage,
 	// }
-	b := NewBaseAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage)
+	b := NewBaseAlertMessage(job, instance, alertMessage, alertMetricsLimit, alertMetricsUsage, now, before1Day, before1Week)
 	return &kafkaAlertMessage{
 		baseAlertMessage: b,
 	}

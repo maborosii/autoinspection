@@ -2,7 +2,7 @@ package alert
 
 import "github.com/jedib0t/go-pretty/v6/table"
 
-var tableHeader = table.Row{"类型", "job", "instance", "主机名", "告警信息", "当前值", "预警阈值"}
+var tableHeader = table.Row{"类型", "job", "instance", "主机名", "告警信息", "当前值", "预警阈值", "指标值（当前）", "指标值（一天前）", "指标值（一周前）"}
 
 // var styleCss = `
 //     table {

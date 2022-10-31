@@ -1,5 +1,7 @@
 package utils
 
+import "fmt"
+
 // merge multi maps
 func MergeMap(mObj ...map[string]string) map[string]string {
 	newObj := map[string]string{}
@@ -17,4 +19,11 @@ func IncreaseRate(a, b float32) float32 {
 		return 0
 	}
 	return (b - a) / a * 100
+}
+func FormatF2S(f float32) string {
+	return fmt.Sprintf("%.2f%%", f)
+}
+
+func FormatF(f float32) string {
+	return fmt.Sprintf("%.2f", f)
 }
