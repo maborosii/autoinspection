@@ -1,6 +1,6 @@
 .PHONY: all build clean run check cover lint docker help
 
-BIN_FILE=notify
+BIN_FILE=ai
 
 # all: check build
 build:

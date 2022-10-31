@@ -20,10 +20,13 @@ func IncreaseRate(a, b float32) float32 {
 	}
 	return (b - a) / a * 100
 }
+
+// convert float32 to string involve percent
 func FormatF2S(f float32) string {
 	return fmt.Sprintf("%.2f%%", f)
 }
 
+// convert float32 to string involve percent
 func FormatF(f float32) string {
 	return fmt.Sprintf("%.2f", f)
 }
