@@ -23,11 +23,11 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 
 			// node metrics
 			case "cpu_usage_percents":
-				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithCPUUsage(newValue))
 			case "cpu_usage_percents_before_1day":
-				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayCPUUsage(newValue))
 			case "cpu_usage_percents_before_1week":
-				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekCpuUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekCPUUsage(newValue))
 			case "mem_usage_percents":
 				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithMemUsage(newValue))
 			case "mem_usage_percents_before_1day":
@@ -41,11 +41,11 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 			case "disk_usage_percents_before_1week":
 				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekDiskUsage(newValue))
 			case "tcp_conn_counts":
-				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithTcpConnUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithTCPConnUsage(newValue))
 			case "tcp_conn_counts_before_1day":
-				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayTcpConnUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1DayTCPConnUsage(newValue))
 			case "tcp_conn_counts_before_1week":
-				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekTcpConnUsage(newValue))
+				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithBefore1WeekTCPConnUsage(newValue))
 
 			// redis metrics
 			case "redis_conn_counts":
