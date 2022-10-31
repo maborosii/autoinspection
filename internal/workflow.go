@@ -53,7 +53,8 @@ func extractMetrics(metricType string) {
 		label := monitorItem.Metrics
 		sql := monitorItem.PromQL
 		eps := monitorItem.Endpoint
-		fmt.Println(label, sql, eps)
+		global.Logger.Debug("query metrics from prom", zap.String("label", label), zap.String("promql", sql), zap.Strings("endpoints", eps))
+
 		for _, ep := range eps {
 			wgSender.Add(1)
 			go func(label, sql string, queryApi v1.API) {

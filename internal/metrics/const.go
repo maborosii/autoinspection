@@ -36,10 +36,16 @@ const (
 	// REDIS_CONN_LIMIT            string = "redis conn counts exceeds the threshold"
 	// REDIS_CONN_RATE_LIMIT_1DAY  string = "redis conn counts increase rate exceeds the threshold in one day"
 	// REDIS_CONN_RATE_LIMIT_1WEEK string = "redis conn counts increase rate exceeds the threshold in one week"
+	// REDIS_MEM_LIMIT            string = "redis memory exceeds the threshold"
+	// REDIS_MEM_RATE_LIMIT_1DAY  string = "redis memory increase rate exceeds the threshold in one day"
+	// REDIS_MEM_RATE_LIMIT_1WEEK string = "redis memory increase rate exceeds the threshold in one week"
 	// cn
 	REDIS_CONN_LIMIT            string = "[redis][连接数] 瞬时值超过阈值 |数值|"
 	REDIS_CONN_RATE_LIMIT_1DAY  string = "[redis][连接数] 一天增长率超过阈值 |百分比|"
 	REDIS_CONN_RATE_LIMIT_1WEEK string = "[redis][连接数] 一周增长率超过阈值 |百分比|"
+	REDIS_MEM_LIMIT             string = "[redis][内存] 瞬时值超过阈值 |百分比|"
+	REDIS_MEM_RATE_LIMIT_1DAY   string = "[redis][内存] 一天增长率超过阈值 |百分比|"
+	REDIS_MEM_RATE_LIMIT_1WEEK  string = "[redis][内存] 一周增长率超过阈值 |百分比|"
 
 	/*kafka alert message
 	 */

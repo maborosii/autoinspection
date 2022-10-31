@@ -54,6 +54,12 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1DayRedisConnsUsage(newValue))
 			case "redis_conn_counts_before_1week":
 				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1WeekRedisConnsUsage(newValue))
+			case "redis_used_mem":
+				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithRedisMemUsage(newValue))
+			case "redis_used_mem_before_1day":
+				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1DayRedisMemUsage(newValue))
+			case "redis_used_mem_before_1week":
+				storeResults.CreateOrModify(result[0], metrics.NewRedisMetrics(result[0]), metrics.WithBefore1WeekRedisMemUsage(newValue))
 
 			// kafka metrics
 			case "kafka_lag_sum":

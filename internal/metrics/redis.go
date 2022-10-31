@@ -16,6 +16,9 @@ type RedisMetrics struct {
 	connsUsage            float32
 	before1DayConnsUsage  float32
 	before1WeekConnsUsage float32
+	memUsage              float32
+	before1DayMemUsage    float32
+	before1WeekMemUsage   float32
 }
 
 func (b *RedisMetrics) GetJob() string {
@@ -42,6 +45,8 @@ func (sr *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 
 	connsInc1Day := ut.IncreaseRate(sr.before1DayConnsUsage, sr.connsUsage)
 	connsInc1Week := ut.IncreaseRate(sr.before1WeekConnsUsage, sr.connsUsage)
+	memInc1Day := ut.IncreaseRate(sr.before1DayMemUsage, sr.memUsage)
+	memInc1Week := ut.IncreaseRate(sr.before1WeekMemUsage, sr.memUsage)
 
 	/* 一周增长率过滤
 	 */
@@ -49,6 +54,11 @@ func (sr *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_CONN_RATE_LIMIT_1WEEK, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", connsInc1Week))
 		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1week", fmt.Sprintf("%.2f%%", connsInc1Week)))
 		return REDIS_CONN_RATE_LIMIT_1WEEK, false
+	}
+	if alertM, ok := rs.WithRedisMemIncrease1WeekRuleFilter(memInc1Week)(sr.RuleItf); !ok {
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_MEM_RATE_LIMIT_1WEEK, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", memInc1Week))
+		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1WEEK, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_increase_usage_1week", fmt.Sprintf("%.2f%%", memInc1Week)))
+		return REDIS_MEM_RATE_LIMIT_1WEEK, false
 	}
 
 	/* 一天增长率过滤
@@ -58,6 +68,11 @@ func (sr *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_conns_increase_usage_1day", fmt.Sprintf("%.2f%%", connsInc1Day)))
 		return REDIS_CONN_RATE_LIMIT_1DAY, false
 	}
+	if alertM, ok := rs.WithRedisMemIncrease1DayRuleFilter(memInc1Day)(sr.RuleItf); !ok {
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_MEM_RATE_LIMIT_1DAY, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", memInc1Day))
+		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1DAY, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_increase_usage_1day", fmt.Sprintf("%.2f%%", memInc1Day)))
+		return REDIS_MEM_RATE_LIMIT_1DAY, false
+	}
 
 	/* 瞬时值过滤
 	 */
@@ -66,6 +81,12 @@ func (sr *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 		global.Logger.Info(REDIS_CONN_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.Float32("redis_conns_usage", sr.connsUsage))
 		return REDIS_CONN_LIMIT, false
 	}
+	if alertM, ok := rs.WithRedisMemRuleFilter(sr.memUsage)(sr.RuleItf); !ok {
+		alertMsgChan <- am.NewRedisAlertMessage(sr.GetJob(), sr.instance, REDIS_MEM_LIMIT, fmt.Sprintf("%.2f%%", alertM.(float32)), fmt.Sprintf("%.2f%%", sr.memUsage))
+		global.Logger.Info(REDIS_MEM_LIMIT, zap.String("job", sr.GetJob()), zap.String("instance", sr.instance), zap.String("redis_memory_usage", fmt.Sprintf("%.2f%%", sr.memUsage)))
+		return REDIS_MEM_LIMIT, false
+	}
+
 	return "", true
 }
 
@@ -91,6 +112,22 @@ func WithBefore1DayRedisConnsUsage(beforeConnsUsage float32) MetricsOption {
 func WithBefore1WeekRedisConnsUsage(beforeConnsUsage float32) MetricsOption {
 	return func(sr MetricsItf) {
 		sr.(*RedisMetrics).before1WeekConnsUsage = beforeConnsUsage
+	}
+}
+
+func WithRedisMemUsage(memUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*RedisMetrics).memUsage = memUsage
+	}
+}
+func WithBefore1DayRedisMemUsage(beforeMemUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*RedisMetrics).before1DayMemUsage = beforeMemUsage
+	}
+}
+func WithBefore1WeekRedisMemUsage(beforeMemUsage float32) MetricsOption {
+	return func(sr MetricsItf) {
+		sr.(*RedisMetrics).before1WeekMemUsage = beforeMemUsage
 	}
 }
 

@@ -46,3 +46,13 @@ var styleCss = `
     	border-color: #666666;
     	background-color: #f2f2f2;
   }`
+
+var sortedByKind = table.SortBy{
+	Name: "类型",
+	Mode: table.Asc,
+}
+
+var sortedByJob = table.SortBy{
+	Name: "job",
+	Mode: table.Asc,
+}
