@@ -4,7 +4,7 @@ logs/
 # hiden sensitive infomation
 monitor.toml
 config.toml
-email_test.go
+# email_test.go
 mail_test.go
 extracter_test.go
 .DS_Store
