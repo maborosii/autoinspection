@@ -20,7 +20,6 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 			}
 			newValue := float32(value)
 			switch queryResult.GetLabel() {
-
 			// node metrics
 			case "cpu_usage_percents":
 				storeResults.CreateOrModify(result[0], metrics.NewNodeMetrics(result[0]), metrics.WithCPUUsage(newValue))

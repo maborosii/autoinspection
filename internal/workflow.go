@@ -25,7 +25,6 @@ var promQLForRedisInfo = "redis_instance_info - 0"
 var promQLForKafkaInfo = "kafka_exporter_build_info - 0"
 
 func WorkFlow(mType string) {
-
 	var storeResults = make(metrics.MetricsMap)
 	allInToJob, nodeInToNodeName := initAllMap(mType)
 	extractMetrics(mType)

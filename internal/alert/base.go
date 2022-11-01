@@ -98,7 +98,7 @@ func RenderTable(rows []table.Row) string {
 		Newline:     "<br/>",
 	}
 
-	prefixMailHtml := fmt.Sprintf("<style>\n%s\n</style>\n", styleCss)
-	htmlContext := prefixMailHtml + t.RenderHTML()
+	prefixMailHTML := fmt.Sprintf("<style>\n%s\n</style>\n", styleCSS)
+	htmlContext := prefixMailHTML + t.RenderHTML()
 	return htmlContext
 }

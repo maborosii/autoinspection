@@ -122,7 +122,7 @@ func WithDiskIncrease1WeekRuleFilter(nums float32) RuleOption {
 }
 
 // tcp 连接数判断
-func WithTcpConnRuleFilter(nums float32) RuleOption {
+func WithTCPConnRuleFilter(nums float32) RuleOption {
 	return func(r RuleItf) (interface{}, bool) {
 		limit := r.(*NodeRule).TCPConn
 		if nums < limit {
@@ -133,7 +133,7 @@ func WithTcpConnRuleFilter(nums float32) RuleOption {
 }
 
 // tcp 连接数一天增长率判断
-func WithTcpConnIncrease1DayRuleFilter(nums float32) RuleOption {
+func WithTCPConnIncrease1DayRuleFilter(nums float32) RuleOption {
 	return func(r RuleItf) (interface{}, bool) {
 		limit := r.(*NodeRule).TCPConnIncrease1Day
 		if nums < limit {
@@ -144,7 +144,7 @@ func WithTcpConnIncrease1DayRuleFilter(nums float32) RuleOption {
 }
 
 // tcp 连接数一周增长率判断
-func WithTcpConnIncrease1WeekRuleFilter(nums float32) RuleOption {
+func WithTCPConnIncrease1WeekRuleFilter(nums float32) RuleOption {
 	return func(r RuleItf) (interface{}, bool) {
 		limit := r.(*NodeRule).TCPConnIncrease1Week
 		if nums < limit {

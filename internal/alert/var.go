@@ -20,7 +20,7 @@ var tableHeader = table.Row{"类型", "job", "instance", "主机名", "告警信
 //     	border-left: 1px solid #000000;
 //     	border-top: 1px solid #000000;
 //     }`
-var styleCss = `
+var styleCSS = `
     table {
     	text-align: center;
     	font-family: verdana, arial, sans-serif;
