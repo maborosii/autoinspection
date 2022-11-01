@@ -35,6 +35,7 @@ func (m *Mail) BuildMessage(msg string) string {
 }
 
 // EmailDialer create gomail.Dialer
+// 自定义接口用于兼容 gomail 的 dailer
 type EmailDialer interface {
 	DialAndSend(m ...*gomail.Message) error
 }
@@ -43,6 +44,7 @@ type mailSendOpt struct {
 	dialerFact func(host string, port int, username, passwd string) EmailDialer
 }
 
+// 定义默认的 dialer --> gomail.Dialer
 func (o *mailSendOpt) fillDefault() *mailSendOpt {
 	o.dialerFact = func(host string, port int, username, passwd string) EmailDialer {
 		return gomail.NewDialer(host, port, username, passwd)
@@ -51,6 +53,7 @@ func (o *mailSendOpt) fillDefault() *mailSendOpt {
 	return o
 }
 
+// 执行一组应用于 mailSendOpt 的函数
 func (o *mailSendOpt) applyOpts(optfs []MailSendOptFunc) *mailSendOpt {
 	for _, optf := range optfs {
 		optf(o)
@@ -62,6 +65,7 @@ func (o *mailSendOpt) applyOpts(optfs []MailSendOptFunc) *mailSendOpt {
 type MailSendOptFunc func(*mailSendOpt)
 
 // WithMailSendDialer set gomail.Dialer
+// mailSendOpt 赋值
 func WithMailSendDialer(dialerFact func(host string, port int, username, passwd string) EmailDialer) MailSendOptFunc {
 	return func(opt *mailSendOpt) {
 		opt.dialerFact = dialerFact
@@ -70,6 +74,7 @@ func WithMailSendDialer(dialerFact func(host string, port int, username, passwd 
 
 // Send send email
 func (m *Mail) Send(subject, content string, toAddr []string, optfs ...MailSendOptFunc) (err error) {
+	// 默认 gomail.dialer
 	opt := new(mailSendOpt).fillDefault().applyOpts(optfs)
 	log.Println("send email toAddr:", toAddr)
 	s := gomail.NewMessage()
@@ -79,7 +84,9 @@ func (m *Mail) Send(subject, content string, toAddr []string, optfs ...MailSendO
 	s.SetBody("text/html", content)
 	// s.SetBody("text/plain", content)
 
+	// 获取 dialer
 	dialer := opt.dialerFact(m.host, m.port, m.username, m.password)
+	// 执行接口方法，发送邮件
 	if err := dialer.DialAndSend(s); err != nil {
 		return errors.Wrap(err, "try to send email got error")
 	}
