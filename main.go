@@ -3,11 +3,8 @@ package main
 import (
 	"fmt"
 	"node_metrics_go/cmd"
-	"node_metrics_go/global"
 	"node_metrics_go/infra"
 	"node_metrics_go/infra/starters"
-	"node_metrics_go/internal"
-	"node_metrics_go/pkg/setting"
 )
 
 func main() {
@@ -17,17 +14,17 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("cmd.Execute err: %v", err))
 	}
-	conf, err := setting.NewSetting(global.ConfigPath)
-	if err != nil {
-		panic(fmt.Sprintf("get config from %s, occurred err; %s", global.ConfigPath, err))
-	}
-	confStruct := &setting.Config{}
-	if err = conf.ReadConfig(confStruct); err != nil {
-		panic(err)
-	}
-	app := infra.NewBootApplication(confStruct)
-	app.Run()
-	internal.WorkFlow(global.MetricsType)
+	// conf, err := setting.NewSetting(global.ConfigPath)
+	// if err != nil {
+	// 	panic(fmt.Sprintf("get config from %s, occurred err; %s", global.ConfigPath, err))
+	// }
+	// confStruct := &setting.Config{}
+	// if err = conf.ReadConfig(confStruct); err != nil {
+	// 	panic(err)
+	// }
+	// app := infra.NewBootApplication(confStruct)
+	// app.Run()
+	// internal.WorkFlow(global.MetricsType)
 }
 
 func init() {

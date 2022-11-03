@@ -6,6 +6,10 @@ type Setting struct {
 	vp *viper.Viper
 }
 
+func NewSettingV(vp *viper.Viper) *Setting {
+	return &Setting{vp}
+}
+
 // 读取配置文件
 func NewSetting(filepath string) (*Setting, error) {
 	vp := viper.New()
