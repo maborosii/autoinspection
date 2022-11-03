@@ -52,14 +52,14 @@ for app in ${apps}; do
   echo "START BUILD APP: ${app}"
   cd ${ROOT_DIR}/
   # 关闭CGO，静态编译，用于生成能在alpine中使用的二进制文件
-  CGO_ENABLED=0 go build -ldflags "$LDFlags" -o ${BIN_DIR}
+  CGO_ENABLED=0 go build -ldflags "$LDFlags" -o ${BIN_DIR}/${app}
   echo "${app} BUILD DONE"
   echo "PRINT INFO  APP: ${app}"
   echo "-----------------INFO---------------------"
   cd ${BIN_DIR}
   # 压缩二进制文件
-  upx ./${app}
-  ./${app} version
+  upx ${BIN_DIR}/${app}
+  ${BIN_DIR}/${app} version
   echo "------------------------------------------"
   echo "******************************************"
 done
