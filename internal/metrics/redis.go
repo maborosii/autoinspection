@@ -53,21 +53,33 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 	if alertM, ok := rs.WithRedisConnsIncrease1WeekRuleFilter(connsInc1Week)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_CONN_RATE_LIMIT_1WEEK,
-			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(connsInc1Week),
-			ut.FormatF(rm.connsUsage), ut.FormatF(rm.before1DayConnsUsage),
+			ut.FormatF2S(alertM.(float32)),
+			ut.FormatF2S(connsInc1Week),
+			ut.FormatF(rm.connsUsage),
+			ut.FormatF(rm.before1DayConnsUsage),
 			ut.FormatF(rm.before1WeekConnsUsage))
 
-		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1WEEK, zap.String("job", rm.GetJob()), zap.String("instance", rm.instance), zap.String("redis_conns_increase_usage_1week", ut.FormatF2S(connsInc1Week)))
+		global.Logger.Info(
+			REDIS_CONN_RATE_LIMIT_1WEEK,
+			zap.String("job", rm.GetJob()),
+			zap.String("instance", rm.instance),
+			zap.String("redis_conns_increase_usage_1week", ut.FormatF2S(connsInc1Week)))
 		return REDIS_CONN_RATE_LIMIT_1WEEK, false
 	}
 	if alertM, ok := rs.WithRedisMemIncrease1WeekRuleFilter(memInc1Week)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_MEM_RATE_LIMIT_1WEEK,
-			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(memInc1Week),
-			ut.FormatF2S(rm.memUsage), ut.FormatF2S(rm.before1DayMemUsage),
+			ut.FormatF2S(alertM.(float32)),
+			ut.FormatF2S(memInc1Week),
+			ut.FormatF2S(rm.memUsage),
+			ut.FormatF2S(rm.before1DayMemUsage),
 			ut.FormatF2S(rm.before1WeekMemUsage))
 
-		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1WEEK, zap.String("job", rm.GetJob()), zap.String("instance", rm.instance), zap.String("redis_memory_increase_usage_1week", ut.FormatF2S(memInc1Week)))
+		global.Logger.Info(
+			REDIS_MEM_RATE_LIMIT_1WEEK,
+			zap.String("job", rm.GetJob()),
+			zap.String("instance", rm.instance),
+			zap.String("redis_memory_increase_usage_1week", ut.FormatF2S(memInc1Week)))
 		return REDIS_MEM_RATE_LIMIT_1WEEK, false
 	}
 
@@ -76,21 +88,33 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 	if alertM, ok := rs.WithRedisConnsIncrease1DayRuleFilter(connsInc1Day)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_CONN_RATE_LIMIT_1DAY,
-			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(connsInc1Day),
-			ut.FormatF(rm.connsUsage), ut.FormatF(rm.before1DayConnsUsage),
+			ut.FormatF2S(alertM.(float32)),
+			ut.FormatF2S(connsInc1Day),
+			ut.FormatF(rm.connsUsage),
+			ut.FormatF(rm.before1DayConnsUsage),
 			ut.FormatF(rm.before1WeekConnsUsage))
 
-		global.Logger.Info(REDIS_CONN_RATE_LIMIT_1DAY, zap.String("job", rm.GetJob()), zap.String("instance", rm.instance), zap.String("redis_conns_increase_usage_1day", ut.FormatF2S(connsInc1Day)))
+		global.Logger.Info(
+			REDIS_CONN_RATE_LIMIT_1DAY,
+			zap.String("job", rm.GetJob()),
+			zap.String("instance", rm.instance),
+			zap.String("redis_conns_increase_usage_1day", ut.FormatF2S(connsInc1Day)))
 		return REDIS_CONN_RATE_LIMIT_1DAY, false
 	}
 	if alertM, ok := rs.WithRedisMemIncrease1DayRuleFilter(memInc1Day)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_MEM_RATE_LIMIT_1DAY,
-			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(memInc1Day),
-			ut.FormatF2S(rm.memUsage), ut.FormatF2S(rm.before1DayMemUsage),
+			ut.FormatF2S(alertM.(float32)),
+			ut.FormatF2S(memInc1Day),
+			ut.FormatF2S(rm.memUsage),
+			ut.FormatF2S(rm.before1DayMemUsage),
 			ut.FormatF2S(rm.before1WeekMemUsage))
 
-		global.Logger.Info(REDIS_MEM_RATE_LIMIT_1DAY, zap.String("job", rm.GetJob()), zap.String("instance", rm.instance), zap.String("redis_memory_increase_usage_1day", ut.FormatF2S(memInc1Day)))
+		global.Logger.Info(
+			REDIS_MEM_RATE_LIMIT_1DAY,
+			zap.String("job", rm.GetJob()),
+			zap.String("instance", rm.instance),
+			zap.String("redis_memory_increase_usage_1day", ut.FormatF2S(memInc1Day)))
 		return REDIS_MEM_RATE_LIMIT_1DAY, false
 	}
 
@@ -99,21 +123,33 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 	if alertM, ok := rs.WithRedisConnsRuleFilter(rm.connsUsage)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_CONN_LIMIT,
-			ut.FormatF(alertM.(float32)), ut.FormatF(rm.connsUsage),
-			ut.FormatF(rm.connsUsage), ut.FormatF(rm.before1DayConnsUsage),
+			ut.FormatF(alertM.(float32)),
+			ut.FormatF(rm.connsUsage),
+			ut.FormatF(rm.connsUsage),
+			ut.FormatF(rm.before1DayConnsUsage),
 			ut.FormatF(rm.before1WeekConnsUsage))
 
-		global.Logger.Info(REDIS_CONN_LIMIT, zap.String("job", rm.GetJob()), zap.String("instance", rm.instance), zap.Float32("redis_conns_usage", rm.connsUsage))
+		global.Logger.Info(
+			REDIS_CONN_LIMIT,
+			zap.String("job", rm.GetJob()),
+			zap.String("instance", rm.instance),
+			zap.Float32("redis_conns_usage", rm.connsUsage))
 		return REDIS_CONN_LIMIT, false
 	}
 	if alertM, ok := rs.WithRedisMemRuleFilter(rm.memUsage)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_MEM_LIMIT,
-			ut.FormatF2S(alertM.(float32)), ut.FormatF2S(rm.memUsage),
-			ut.FormatF2S(rm.memUsage), ut.FormatF2S(rm.before1DayMemUsage),
+			ut.FormatF2S(alertM.(float32)),
+			ut.FormatF2S(rm.memUsage),
+			ut.FormatF2S(rm.memUsage),
+			ut.FormatF2S(rm.before1DayMemUsage),
 			ut.FormatF2S(rm.before1WeekMemUsage))
 
-		global.Logger.Info(REDIS_MEM_LIMIT, zap.String("job", rm.GetJob()), zap.String("instance", rm.instance), zap.String("redis_memory_usage", ut.FormatF2S(rm.memUsage)))
+		global.Logger.Info(
+			REDIS_MEM_LIMIT,
+			zap.String("job", rm.GetJob()),
+			zap.String("instance", rm.instance),
+			zap.String("redis_memory_usage", ut.FormatF2S(rm.memUsage)))
 		return REDIS_MEM_LIMIT, false
 	}
 
@@ -163,11 +199,11 @@ func WithBefore1WeekRedisMemUsage(beforeMemUsage float32) MetricsOption {
 
 func NewRedisMetrics(instance string, options ...MetricsOption) *RedisMetrics {
 	mi := &BaseMetrics{instance: instance}
-	sr := &RedisMetrics{
+	rm := &RedisMetrics{
 		BaseMetrics: mi,
 	}
 	for _, option := range options {
-		option(sr)
+		option(rm)
 	}
-	return sr
+	return rm
 }

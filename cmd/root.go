@@ -59,7 +59,6 @@ func initConfig() {
 	if err := conf.ReadConfig(confStruct); err != nil {
 		panic(err)
 	}
-
 }
 
 // 初始化，将子命令嵌入到根命令中
@@ -69,6 +68,7 @@ func init() {
 	rootCmd.AddCommand(nodeCmd)
 	rootCmd.AddCommand(redisCmd)
 	rootCmd.AddCommand(kafkaCmd)
+	rootCmd.AddCommand(rabbitMQCmd)
 	rootCmd.AddCommand(allCmd)
 	rootCmd.AddCommand(versionCmd)
 }

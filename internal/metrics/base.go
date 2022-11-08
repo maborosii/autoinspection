@@ -71,6 +71,10 @@ func (m MetricsMap) MapToJobAndNodeName(instanceToJob, instanceToNodeName map[st
 			WithKafkaJob(instanceToJob[k])(v)
 			global.Logger.Debug("[kafka metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
+		case *RabbitMQMetrics:
+			WithRabbitMQJob(instanceToJob[k])(v)
+			global.Logger.Debug("[rabbitmq metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+
 		default:
 			global.Logger.Warn("unknown type for MetricsItf")
 		}

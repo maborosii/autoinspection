@@ -51,6 +51,15 @@ func (d *RulesStarter) setupRules(conf *setting.Config) {
 				}
 				global.NotifyRules[kafkaRule.GetRuleJob()] = kafkaRule
 			}
+		case "rabbitmq":
+			for _, jj := range j {
+				rabbitMQRule := new(rs.RabbitMQRule)
+				err := mapstructure.Decode(jj, rabbitMQRule)
+				if err != nil {
+					panic(fmt.Sprintf("mapstructure rules for rabbitMQ occur error: %s", err))
+				}
+				global.NotifyRules[rabbitMQRule.GetRuleJob()] = rabbitMQRule
+			}
 		default:
 			panic(fmt.Sprintf("not suitable rule type in config, rule.type: %s", tt))
 		}

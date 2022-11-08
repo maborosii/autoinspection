@@ -10,7 +10,11 @@ import (
 
 // 将返回的结果进行转换
 func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) {
+RES_CHANNEL_LOOP:
 	for queryResult := range mChan {
+		if queryResult == nil {
+			continue RES_CHANNEL_LOOP
+		}
 		results := queryResult.CleanValue(valuePattern)
 		for _, result := range results {
 			value, err := strconv.ParseFloat(result[1], 32)
@@ -67,6 +71,20 @@ func ShuffleResult(mChan <-chan *QueryResult, storeResults *metrics.MetricsMap) 
 				storeResults.CreateOrModify(result[0], metrics.NewKafkaMetrics(result[0]), metrics.WithBefore1DayKafkaLagSumUsage(newValue))
 			case "kafka_lag_sum_before_1week":
 				storeResults.CreateOrModify(result[0], metrics.NewKafkaMetrics(result[0]), metrics.WithBefore1WeekKafkaLagSumUsage(newValue))
+
+			// kafka metrics
+			case "rabbitmq_running_nodes":
+				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithRabbitMQRunningNodesUsage(int8(newValue)))
+			case "rabbitmq_running_nodes_before_1day":
+				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithBefore1DayRabbitMQRunningNodesUsage(int8(newValue)))
+			case "rabbitmq_running_nodes_before_1week":
+				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithBefore1WeekRabbitMQRunningNodesUsage(int8(newValue)))
+			case "rabbitmq_lag_sum":
+				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithRabbitMQLagSumUsage(newValue))
+			case "rabbitmq_lag_sum_before_1day":
+				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithBefore1DayRabbitMQLagSumUsage(newValue))
+			case "rabbitmq_lag_sum_before_1week":
+				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithBefore1WeekRabbitMQLagSumUsage(newValue))
 
 			default:
 				global.Logger.Info("NOT FOUND IN USE METRICS LABEL")

@@ -30,3 +30,6 @@ func FormatF2S(f float32) string {
 func FormatF(f float32) string {
 	return fmt.Sprintf("%.2f", f)
 }
+func FormatD(i int8) string {
+	return fmt.Sprintf("%d", i)
+}

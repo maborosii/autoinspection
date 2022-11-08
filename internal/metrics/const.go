@@ -57,6 +57,34 @@ const (
 	KAFKA_LAG_SUM_LIMIT            string = "[kafka][总堆积量] 瞬时值超过阈值 |数值|"
 	KAFKA_LAG_SUM_RATE_LIMIT_1DAY  string = "[kafka][总堆积量] 一天增长率超过阈值 |百分比|"
 	KAFKA_LAG_SUM_RATE_LIMIT_1WEEK string = "[kafka][总堆积量] 一周增长率超过阈值 |百分比|"
+
+	/*rabbitmq alert message
+	 */
+	// en
+	// RABBITMQ_RUNNING_NODES               string = "rabbitmq running nodes not equals the threshold"
+	// RABBITMQ_RUNNING_NODES_CHANGE_1DAY   string = "rabbitmq running nodes changed in one day"
+	// RABBITMQ_RUNNING_NODES_CHANGE_1WEEK  string = "rabbitmq running nodes changed in one week"
+	// RABBITMQ_LAG_SUM_LIMIT               string = "rabbitmq lag sum exceeds the threshold"
+	// RABBITMQ_LAG_SUM_RATE_LIMIT_1DAY     string = "rabbitmq lag sum increase rate exceeds the threshold in one day"
+	// RABBITMQ_LAG_SUM_RATE_LIMIT_1WEEK    string = "rabbitmq lag sum increase rate exceeds the threshold in one week"
+	// cn
+	RABBITMQ_RUNNING_NODES               string = "[rabbitmq][运行节点数] 瞬时值异常 |数值|"
+	RABBITMQ_RUNNING_NODES_CHANGED_1DAY  string = "[rabbitmq][运行节点数] 一天变化数目异常 |数值|"
+	RABBITMQ_RUNNING_NODES_CHANGED_1WEEK string = "[rabbitmq][运行节点数] 一周变化数目异常 |数值|"
+	RABBITMQ_LAG_SUM_LIMIT               string = "[rabbitmq][总堆积量] 瞬时值超过阈值 |数值|"
+	RABBITMQ_LAG_SUM_RATE_LIMIT_1DAY     string = "[rabbitmq][总堆积量] 一天增长率超过阈值 |百分比|"
+	RABBITMQ_LAG_SUM_RATE_LIMIT_1WEEK    string = "[rabbitmq][总堆积量] 一周增长率超过阈值 |百分比|"
+
+	/*elasticsearch alert message
+	 */
+	// en
+	// ELASTICSEARCH_HEALTH_STATUS               string = "elasticsearch is not healthy"
+	// ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY  string = "elasticsearch health status changed in one day"
+	// ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK string = "elasticsearch health status changed in one week"
+	// cn
+	ELASTICSEARCH_HEALTH_STATUS               string = "[elasticsearch][健康值] 瞬时值异常 |数值|"
+	ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY  string = "[elasticsearch][健康值] 一天变化异常 |数值|"
+	ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK string = "[elasticsearch][健康值] 一周变化异常 |数值|"
 )
 const (
 	NODE_METRICS          string = "node"

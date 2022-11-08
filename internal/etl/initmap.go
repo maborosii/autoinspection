@@ -36,3 +36,14 @@ func (q *QueryResult) KafkaInitInstanceMap() map[string]string {
 	}
 	return instanceToJob
 }
+
+// 用于 rabbitMQ 初始化获取 instance，job 之间的映射关系
+func (q *QueryResult) RabbitMQInitInstanceMap() map[string]string {
+	instanceToJob := make(map[string]string, 100)
+	var re = regexp.MustCompile(mapPattenForRabbitMQ)
+	matched := re.FindAllStringSubmatch(q.value.String(), -1)
+	for _, match := range matched {
+		instanceToJob[match[2]] = match[1]
+	}
+	return instanceToJob
+}

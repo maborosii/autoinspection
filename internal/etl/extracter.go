@@ -57,7 +57,7 @@ func QueryFromProm(label string, promql string, api v1.API) *QueryResult {
 	result, warnings, err := api.Query(ctx, promql, time.Now())
 
 	if err != nil {
-		global.Logger.Fatal("Error querying Prometheus", zap.Error(err), zap.String("metrics", label))
+		global.Logger.Error("Error querying Prometheus, Skip this query", zap.Error(err), zap.String("metrics", label))
 		return nil
 	}
 	if len(warnings) > 0 {

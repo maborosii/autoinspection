@@ -23,6 +23,7 @@ var metricsChan = make(chan *etl.QueryResult, 10)
 var promQLForNodeInfo = "node_uname_info - 0"
 var promQLForRedisInfo = "redis_instance_info - 0"
 var promQLForKafkaInfo = "kafka_exporter_build_info - 0"
+var promQLForRabbitMQInfo = "rabbitmq_exporter_build_info-0"
 
 func WorkFlow(mType string) {
 	var storeResults = make(metrics.MetricsMap)
@@ -97,6 +98,9 @@ func initMetricMap(metricType string) (map[string]string, map[string]string) {
 			instanceToJob = utils.MergeMap(instanceToJob, c)
 		case "kafka":
 			d := etl.QueryFromProm(fmt.Sprintf("init kafka, endpoint: %s", k), promQLForKafkaInfo, global.PromClients[k]).KafkaInitInstanceMap()
+			instanceToJob = utils.MergeMap(instanceToJob, d)
+		case "rabbitmq":
+			d := etl.QueryFromProm(fmt.Sprintf("init rabbitMQ, endpoint: %s", k), promQLForRabbitMQInfo, global.PromClients[k]).RabbitMQInitInstanceMap()
 			instanceToJob = utils.MergeMap(instanceToJob, d)
 		case "es":
 		default:
