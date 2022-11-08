@@ -75,6 +75,10 @@ func (m MetricsMap) MapToJobAndNodeName(instanceToJob, instanceToNodeName map[st
 			WithRabbitMQJob(instanceToJob[k])(v)
 			global.Logger.Debug("[rabbitmq metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
+		case *ElasticSearchMetrics:
+			WithElasticSearchJob(instanceToJob[k])(v)
+			global.Logger.Debug("[elasticsearch metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+
 		default:
 			global.Logger.Warn("unknown type for MetricsItf")
 		}

@@ -11,6 +11,7 @@ var mapPattenForNode = `(?m)instance="(.*?)".*\sjob="(.*?)".*\snodename="(.*?)".
 var mapPattenForRedis = `(?m)group="(.*?)".*\sinstance="(.*?)".*\s=>\s.*$`
 var mapPattenForKafka = `(?m)instance="(.*?)".*\sjob="(.*?)".*\s=>\s.*$`
 var mapPattenForRabbitMQ = `(?m)group="(.*?)".*\sinstance="(.*?)".*\s=>\s.*$`
+var mapPattenForElasticSearch = `(?m)cluster="(.*?)".*\sinstance="(.*?)".*\s=>\s.*$`
 
 // 正则表达式匹配模式 --> 筛选出 intance 和 value
 // 获取指标值的正则

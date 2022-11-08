@@ -60,6 +60,15 @@ func (d *RulesStarter) setupRules(conf *setting.Config) {
 				}
 				global.NotifyRules[rabbitMQRule.GetRuleJob()] = rabbitMQRule
 			}
+		case "es":
+			for _, jj := range j {
+				elasticSearchRule := new(rs.ElasticSearchRule)
+				err := mapstructure.Decode(jj, elasticSearchRule)
+				if err != nil {
+					panic(fmt.Sprintf("mapstructure rules for elasticSearch occur error: %s", err))
+				}
+				global.NotifyRules[elasticSearchRule.GetRuleJob()] = elasticSearchRule
+			}
 		default:
 			panic(fmt.Sprintf("not suitable rule type in config, rule.type: %s", tt))
 		}

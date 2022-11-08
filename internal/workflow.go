@@ -24,6 +24,7 @@ var promQLForNodeInfo = "node_uname_info - 0"
 var promQLForRedisInfo = "redis_instance_info - 0"
 var promQLForKafkaInfo = "kafka_exporter_build_info - 0"
 var promQLForRabbitMQInfo = "rabbitmq_exporter_build_info-0"
+var promQLForElasticSearchInfo = "rabbitmq_exporter_build_info-0"
 
 func WorkFlow(mType string) {
 	var storeResults = make(metrics.MetricsMap)
@@ -100,9 +101,11 @@ func initMetricMap(metricType string) (map[string]string, map[string]string) {
 			d := etl.QueryFromProm(fmt.Sprintf("init kafka, endpoint: %s", k), promQLForKafkaInfo, global.PromClients[k]).KafkaInitInstanceMap()
 			instanceToJob = utils.MergeMap(instanceToJob, d)
 		case "rabbitmq":
-			d := etl.QueryFromProm(fmt.Sprintf("init rabbitMQ, endpoint: %s", k), promQLForRabbitMQInfo, global.PromClients[k]).RabbitMQInitInstanceMap()
-			instanceToJob = utils.MergeMap(instanceToJob, d)
+			e := etl.QueryFromProm(fmt.Sprintf("init rabbitMQ, endpoint: %s", k), promQLForRabbitMQInfo, global.PromClients[k]).RabbitMQInitInstanceMap()
+			instanceToJob = utils.MergeMap(instanceToJob, e)
 		case "es":
+			f := etl.QueryFromProm(fmt.Sprintf("init elasticsearch, endpoint: %s", k), promQLForElasticSearchInfo, global.PromClients[k]).ElasticSearchInitInstanceMap()
+			instanceToJob = utils.MergeMap(instanceToJob, f)
 		default:
 			global.Logger.Error("endpoint's metric type is not supported", zap.String("type", v))
 		}

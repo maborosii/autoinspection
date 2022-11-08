@@ -72,7 +72,7 @@ RES_CHANNEL_LOOP:
 			case "kafka_lag_sum_before_1week":
 				storeResults.CreateOrModify(result[0], metrics.NewKafkaMetrics(result[0]), metrics.WithBefore1WeekKafkaLagSumUsage(newValue))
 
-			// kafka metrics
+			// rabbitmq metrics
 			case "rabbitmq_running_nodes":
 				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithRabbitMQRunningNodesUsage(int8(newValue)))
 			case "rabbitmq_running_nodes_before_1day":
@@ -85,6 +85,14 @@ RES_CHANNEL_LOOP:
 				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithBefore1DayRabbitMQLagSumUsage(newValue))
 			case "rabbitmq_lag_sum_before_1week":
 				storeResults.CreateOrModify(result[0], metrics.NewRabbitMQMetrics(result[0]), metrics.WithBefore1WeekRabbitMQLagSumUsage(newValue))
+
+			// elasticsearch metrics
+			case "es_health_status":
+				storeResults.CreateOrModify(result[0], metrics.NewElasticSearchMetrics(result[0]), metrics.WithElasticSearchHeathStatus(int8(newValue)))
+			case "es_health_status_before_1day":
+				storeResults.CreateOrModify(result[0], metrics.NewElasticSearchMetrics(result[0]), metrics.WithBefore1DayElasticSearchHealthStatus(int8(newValue)))
+			case "es_health_status_before_1week":
+				storeResults.CreateOrModify(result[0], metrics.NewElasticSearchMetrics(result[0]), metrics.WithBefore1WeekElasticSearchHealthStatus(int8(newValue)))
 
 			default:
 				global.Logger.Info("NOT FOUND IN USE METRICS LABEL")

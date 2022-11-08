@@ -69,6 +69,7 @@ func init() {
 	rootCmd.AddCommand(redisCmd)
 	rootCmd.AddCommand(kafkaCmd)
 	rootCmd.AddCommand(rabbitMQCmd)
+	rootCmd.AddCommand(elasticSearchCmd)
 	rootCmd.AddCommand(allCmd)
 	rootCmd.AddCommand(versionCmd)
 }
