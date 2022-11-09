@@ -163,8 +163,8 @@ func initNodeLabelHandleMap() {
 	metricsLabelHandlerMap.registerHandler("tcp_conn_counts_before_1week", func(instance string, value float32, mm *metrics.MetricsMap) {
 		mm.CreateOrModify(instance, metrics.NewNodeMetrics(instance), metrics.WithBefore1WeekTCPConnUsage(value))
 	})
-
 }
+
 func initRedisLabelHandler() {
 	// register redis metrics handler
 	metricsLabelHandlerMap.registerHandler("redis_conn_counts", func(instance string, value float32, mm *metrics.MetricsMap) {
@@ -185,8 +185,8 @@ func initRedisLabelHandler() {
 	metricsLabelHandlerMap.registerHandler("redis_used_mem_before_1week", func(instance string, value float32, mm *metrics.MetricsMap) {
 		mm.CreateOrModify(instance, metrics.NewRedisMetrics(instance), metrics.WithBefore1WeekRedisMemUsage(value))
 	})
-
 }
+
 func initKafkaLabelHandler() {
 	// register kafka metrics handler
 	metricsLabelHandlerMap.registerHandler("kafka_lag_sum", func(instance string, value float32, mm *metrics.MetricsMap) {
@@ -198,7 +198,6 @@ func initKafkaLabelHandler() {
 	metricsLabelHandlerMap.registerHandler("kafka_lag_sum_before_1week", func(instance string, value float32, mm *metrics.MetricsMap) {
 		mm.CreateOrModify(instance, metrics.NewKafkaMetrics(instance), metrics.WithBefore1WeekKafkaLagSumUsage(value))
 	})
-
 }
 
 func initRabbitMQLabelHandler() {
