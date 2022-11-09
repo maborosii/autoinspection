@@ -32,6 +32,7 @@ var rootCmd = &cobra.Command{
 func Execute() error {
 	return rootCmd.Execute()
 }
+
 func initConfig() {
 	var vp = viper.New()
 	if cfgFile != "" {
@@ -43,7 +44,7 @@ func initConfig() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		// 在 当前目录 目录下面查找名为 "config.toml" 的配置文件
+		// 在 当前目录的 configs 目录下面查找名为 "config.toml" 的配置文件
 		vp.AddConfigPath(path.Join(localPath, "configs"))
 		vp.SetConfigName("config")
 		vp.SetConfigType("toml")

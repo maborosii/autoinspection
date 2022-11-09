@@ -9,8 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// var allConfig string
-
 var allCmd = &cobra.Command{
 	Use:   "all",
 	Short: "获取全部指标",
