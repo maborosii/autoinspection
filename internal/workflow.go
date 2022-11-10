@@ -24,26 +24,37 @@ var promQLForNodeInfo = "node_uname_info - 0"
 var promQLForRedisInfo = "redis_instance_info - 0"
 var promQLForKafkaInfo = "kafka_exporter_build_info - 0"
 var promQLForRabbitMQInfo = "rabbitmq_exporter_build_info-0"
-var promQLForElasticSearchInfo = "rabbitmq_exporter_build_info-0"
+var promQLForElasticSearchInfo = "elasticsearch_clusterinfo_version_info-0"
 
+// mian flow
 func WorkFlow(mType string) {
+	// store structure date for all king of metrics
 	var storeResults = make(metrics.MetricsMap)
+
+	//  get all maps of instance to job and nodeName
 	allInToJob, nodeInToNodeName := initAllMap(mType)
+	// get all metrics from proms
 	extractMetrics(mType)
 
 	wgReceiver.Add(1)
 	// 转换数据
 	go func() {
 		defer wgReceiver.Done()
+		// shuffle metrics from proms
 		etl.ShuffleResult(metricsChan, &storeResults)
 	}()
 	wgReceiver.Wait()
 
+	// bind job and nodeName for structure metrics data
 	storeResults.MapToJobAndNodeName(allInToJob, nodeInToNodeName)
+	// bind alert rules for structure metrics data by job
 	storeResults.MapToRules()
+
+	// execute metrics's alert rules
 	storeResults.Notify()
 }
 
+// Get filter metrics type from external prometheus
 func extractMetrics(metricType string) {
 	filterType := metricType
 	if metricType == "all" {
@@ -64,7 +75,7 @@ func extractMetrics(metricType string) {
 			}(label, sql, global.PromClients[ep])
 		}
 	}
-	// 关闭 消息体通道
+	// close channel of message
 	go func() {
 		wgSender.Wait()
 		close(metricsChan)

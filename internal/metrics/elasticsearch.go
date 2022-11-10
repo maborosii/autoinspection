@@ -39,8 +39,8 @@ func (em *ElasticSearchMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string
 		return "", true
 	}
 
-	statusChange1day := em.healthStatus - em.before1DayHealthStatus
-	statusChange1Week := em.healthStatus - em.before1WeekHealthStatus
+	// statusChange1day := em.healthStatus - em.before1DayHealthStatus
+	// statusChange1Week := em.healthStatus - em.before1WeekHealthStatus
 
 	/* 健康状态瞬时值过滤
 	 */
@@ -63,41 +63,41 @@ func (em *ElasticSearchMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string
 
 	/* 健康状态一天变化过滤
 	 */
-	if alertM, ok := rs.WithElasticSearchHealthStatusChange1DayRuleFilter(statusChange1day)(em.RuleItf); !ok {
-		alertMsgChan <- am.NewElasticSearchAlertMessage(
-			em.GetJob(), em.instance, ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY,
-			ut.FormatD(alertM.(int8)),
-			ut.FormatD(statusChange1day),
-			ut.FormatD(em.healthStatus),
-			ut.FormatD(em.before1DayHealthStatus),
-			ut.FormatD(em.before1WeekHealthStatus))
+	// if alertM, ok := rs.WithElasticSearchHealthStatusChange1DayRuleFilter(statusChange1day)(em.RuleItf); !ok {
+	// 	alertMsgChan <- am.NewElasticSearchAlertMessage(
+	// 		em.GetJob(), em.instance, ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY,
+	// 		ut.FormatD(alertM.(int8)),
+	// 		ut.FormatD(statusChange1day),
+	// 		ut.FormatD(em.healthStatus),
+	// 		ut.FormatD(em.before1DayHealthStatus),
+	// 		ut.FormatD(em.before1WeekHealthStatus))
 
-		global.Logger.Info(
-			ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY,
-			zap.String("job", em.GetJob()),
-			zap.String("instance", em.instance),
-			zap.Int8("elasticsearch_health_status_changed_1day", statusChange1day))
-		return ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY, false
-	}
+	// 	global.Logger.Info(
+	// 		ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY,
+	// 		zap.String("job", em.GetJob()),
+	// 		zap.String("instance", em.instance),
+	// 		zap.Int8("elasticsearch_health_status_changed_1day", statusChange1day))
+	// 	return ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY, false
+	// }
 
 	/* 节点数一周变化过滤
 	 */
-	if alertM, ok := rs.WithElasticSearchHealthStatusChange1WeekRuleFilter(statusChange1Week)(em.RuleItf); !ok {
-		alertMsgChan <- am.NewElasticSearchAlertMessage(
-			em.GetJob(), em.instance, ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK,
-			ut.FormatD(alertM.(int8)),
-			ut.FormatD(statusChange1Week),
-			ut.FormatD(em.healthStatus),
-			ut.FormatD(em.before1DayHealthStatus),
-			ut.FormatD(em.before1WeekHealthStatus))
+	// if alertM, ok := rs.WithElasticSearchHealthStatusChange1WeekRuleFilter(statusChange1Week)(em.RuleItf); !ok {
+	// 	alertMsgChan <- am.NewElasticSearchAlertMessage(
+	// 		em.GetJob(), em.instance, ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK,
+	// 		ut.FormatD(alertM.(int8)),
+	// 		ut.FormatD(statusChange1Week),
+	// 		ut.FormatD(em.healthStatus),
+	// 		ut.FormatD(em.before1DayHealthStatus),
+	// 		ut.FormatD(em.before1WeekHealthStatus))
 
-		global.Logger.Info(
-			ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK,
-			zap.String("job", em.GetJob()),
-			zap.String("instance", em.instance),
-			zap.Int8("elasticsearch_health_status_changed_1week", statusChange1Week))
-		return ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK, false
-	}
+	// 	global.Logger.Info(
+	// 		ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK,
+	// 		zap.String("job", em.GetJob()),
+	// 		zap.String("instance", em.instance),
+	// 		zap.Int8("elasticsearch_health_status_changed_1week", statusChange1Week))
+	// 	return ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK, false
+	// }
 
 	return "", true
 }

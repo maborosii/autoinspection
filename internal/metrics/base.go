@@ -116,9 +116,6 @@ func (m MetricsMap) Notify() {
 		close(alertMessageChan)
 	}()
 
-	// mailMessage := MergeAlertInfo(alertMessageChan)
-	// mm := mail.NewMailMessage(mailMessage)
-
 	tableRows := am.MergeAlertInfoFormatTable(alertMessageChan)
 	mailMessage := am.RenderTable(tableRows)
 	mm := mail.NewMailMessage(mailMessage)
