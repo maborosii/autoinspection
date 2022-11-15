@@ -49,8 +49,8 @@ type ruleRegister interface {
 type nodeRulesRegister struct{}
 
 func (n nodeRulesRegister) register(confRules []interface{}) {
-	nodeRule := new(rs.NodeRule)
 	for _, jj := range confRules {
+		nodeRule := new(rs.NodeRule)
 		err := mapstructure.Decode(jj, nodeRule)
 		if err != nil {
 			panic(fmt.Sprintf("mapstructure rules for node occur error: %s", err))
@@ -62,8 +62,8 @@ func (n nodeRulesRegister) register(confRules []interface{}) {
 type redisRulesRegister struct{}
 
 func (n redisRulesRegister) register(confRules []interface{}) {
-	redisRule := new(rs.RedisRule)
 	for _, jj := range confRules {
+		redisRule := new(rs.RedisRule)
 		err := mapstructure.Decode(jj, redisRule)
 		if err != nil {
 			panic(fmt.Sprintf("mapstructure rules for redis occur error: %s", err))
@@ -75,8 +75,8 @@ func (n redisRulesRegister) register(confRules []interface{}) {
 type kafkaRulesRegister struct{}
 
 func (n kafkaRulesRegister) register(confRules []interface{}) {
-	kafkaRule := new(rs.KafkaRule)
 	for _, jj := range confRules {
+		kafkaRule := new(rs.KafkaRule)
 		err := mapstructure.Decode(jj, kafkaRule)
 		if err != nil {
 			panic(fmt.Sprintf("mapstructure rules for kafka occur error: %s", err))
@@ -88,8 +88,8 @@ func (n kafkaRulesRegister) register(confRules []interface{}) {
 type rabbitMQRulesRegister struct{}
 
 func (n rabbitMQRulesRegister) register(confRules []interface{}) {
-	rabbitMQRule := new(rs.RabbitMQRule)
 	for _, jj := range confRules {
+		rabbitMQRule := new(rs.RabbitMQRule)
 		err := mapstructure.Decode(jj, rabbitMQRule)
 		if err != nil {
 			panic(fmt.Sprintf("mapstructure rules for rabbitmq occur error: %s", err))
@@ -101,8 +101,8 @@ func (n rabbitMQRulesRegister) register(confRules []interface{}) {
 type elasticSearchRulesRegister struct{}
 
 func (n elasticSearchRulesRegister) register(confRules []interface{}) {
-	elasticSearchRule := new(rs.ElasticSearchRule)
 	for _, jj := range confRules {
+		elasticSearchRule := new(rs.ElasticSearchRule)
 		err := mapstructure.Decode(jj, elasticSearchRule)
 		if err != nil {
 			panic(fmt.Sprintf("mapstructure rules for elasticSearch occur error: %s", err))

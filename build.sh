@@ -52,7 +52,7 @@ for app in ${apps}; do
   echo "START BUILD APP: ${app}"
   cd ${ROOT_DIR}/
   # 关闭CGO，静态编译，用于生成能在alpine中使用的二进制文件
-  CGO_ENABLED=0 go build -ldflags "$LDFlags" -o ${BIN_DIR}/${app}
+  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "$LDFlags" -o ${BIN_DIR}/${app}
   echo "${app} BUILD DONE"
   echo "PRINT INFO  APP: ${app}"
   echo "-----------------INFO---------------------"
