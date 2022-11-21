@@ -54,6 +54,8 @@ func MergeAlertInfo(a <-chan AlertInfo) string {
 			alertInfoByKind["rabbitmq"] += v.PrintAlert("RabbitMQ")
 		case *elasticSearchAlertMessage:
 			alertInfoByKind["es"] += v.PrintAlert("ElasticSearch")
+		case *jvmAlertMessage:
+			alertInfoByKind["jvm"] += v.PrintAlert("JVM")
 		default:
 			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert("Unknown")))
 		}
@@ -67,7 +69,7 @@ func MergeAlertInfo(a <-chan AlertInfo) string {
 // 表格信息
 func MergeAlertInfoFormatTable(a <-chan AlertInfo) []table.Row {
 	var mm []table.Row
-	alertInfoByKind := make(map[string][]table.Row, 5)
+	alertInfoByKind := make(map[string][]table.Row, 8)
 	for v := range a {
 		switch v.(type) {
 		case *nodeAlertMessage:
@@ -80,6 +82,8 @@ func MergeAlertInfoFormatTable(a <-chan AlertInfo) []table.Row {
 			alertInfoByKind["rabbitmq"] = append(alertInfoByKind["rabbitmq"], v.PrintAlertFormatTable("RabbitMQ"))
 		case *elasticSearchAlertMessage:
 			alertInfoByKind["es"] = append(alertInfoByKind["es"], v.PrintAlertFormatTable("ElasticSearch"))
+		case *jvmAlertMessage:
+			alertInfoByKind["jvm"] = append(alertInfoByKind["jvm"], v.PrintAlertFormatTable("JVM"))
 		default:
 			global.Logger.Warn("alert info not found suitable type", zap.String("info", v.PrintAlert("Unknown")))
 		}

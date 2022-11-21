@@ -6,12 +6,13 @@ package etl
 // 并发控制通道
 var concurrencyChan = make(chan struct{}, 10)
 
-// 获取 job 和 intance, nodename 的映射关系
+// 获取 job 和 intance, (nodename | appname)的映射关系
 var mapPattenForNode = `(?m)instance="(.*?)".*\sjob="(.*?)".*\snodename="(.*?)".*\s=>\s.*$`
 var mapPattenForRedis = `(?m)group="(.*?)".*\sinstance="(.*?)".*\s=>\s.*$`
 var mapPattenForKafka = `(?m)instance="(.*?)".*\sjob="(.*?)".*\s=>\s.*$`
 var mapPattenForRabbitMQ = `(?m)group="(.*?)".*\sinstance="(.*?)".*\s=>\s.*$`
 var mapPattenForElasticSearch = `(?m)cluster="(.*?)".*\sinstance="(.*?)".*\s=>\s.*$`
+var mapPattenForJVM = `(?m)application="(.*?)".*\sexported_instance="(.*?)".*\s=>\s.*$`
 
 // 正则表达式匹配模式 --> 筛选出 intance 和 value
 // 获取指标值的正则

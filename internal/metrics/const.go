@@ -85,6 +85,16 @@ const (
 	ELASTICSEARCH_HEALTH_STATUS               string = "[elasticsearch][健康值] 瞬时值异常 |数值|"
 	ELASTICSEARCH_HEALTH_STATUS_CHANGED_1DAY  string = "[elasticsearch][健康值] 一天变化异常 |数值|"
 	ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK string = "[elasticsearch][健康值] 一周变化异常 |数值|"
+	/*jvm alert message
+	 */
+	// en
+	// JVM_BLOCKED_THREAD_COUNT  string = "jvm blocked thread count exceed the threshold"
+	// JVM_GARBAGE_COLLECT_TIME  string = "jvm gc time exceed the threshold"
+	// JVM_GARBAGE_COLLECT_COUNT string = "jvm gc count exceed the threshold"
+	// cn
+	JVM_BLOCKED_THREAD_COUNT  string = "[jvm][阻塞线程数] 瞬时值异常 |数值|"
+	JVM_GARBAGE_COLLECT_TIME  string = "[jvm][gc 时间] 瞬时值异常 |数值|"
+	JVM_GARBAGE_COLLECT_COUNT string = "[jvm][gc 次数] 瞬时值异常 |数值|"
 )
 const (
 	NODE_METRICS          string = "node"
@@ -92,4 +102,5 @@ const (
 	KAFKA_METRICS         string = "kafka"
 	RABBITMQ_METRICS      string = "rabbitmq"
 	ELASTICSEARCH_METRICS string = "es"
+	JVM_METRICS           string = "jvm"
 )

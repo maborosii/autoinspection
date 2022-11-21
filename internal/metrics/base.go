@@ -65,19 +65,25 @@ func (m MetricsMap) MapToJobAndNodeName(instanceToJob, instanceToNodeName map[st
 
 		case *RedisMetrics:
 			WithRedisJob(instanceToJob[k])(v)
-			global.Logger.Debug("[redis metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("[redis metrics] mapping instance to job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
 		case *KafkaMetrics:
 			WithKafkaJob(instanceToJob[k])(v)
-			global.Logger.Debug("[kafka metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("[kafka metrics] mapping instance to job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
 		case *RabbitMQMetrics:
 			WithRabbitMQJob(instanceToJob[k])(v)
-			global.Logger.Debug("[rabbitmq metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("[rabbitmq metrics] mapping instance to job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
 		case *ElasticSearchMetrics:
 			WithElasticSearchJob(instanceToJob[k])(v)
-			global.Logger.Debug("[elasticsearch metrics] mapping instance and job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+			global.Logger.Debug("[elasticsearch metrics] mapping instance to job mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
+
+		case *JVMMetrics:
+			// related instance to app_name
+			WithJVMAppName(instanceToJob[k])(v)
+			WithJVMJob("default_jvm")(v)
+			global.Logger.Debug("[jvm metrics] mapping instance and job and appName mapping, ", zap.String("key", k), zap.String("job", v.GetJob()))
 
 		default:
 			global.Logger.Warn("unknown type for MetricsItf")

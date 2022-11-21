@@ -25,6 +25,7 @@ var promQLForRedisInfo = "redis_instance_info - 0"
 var promQLForKafkaInfo = "kafka_exporter_build_info - 0"
 var promQLForRabbitMQInfo = "rabbitmq_exporter_build_info-0"
 var promQLForElasticSearchInfo = "elasticsearch_clusterinfo_version_info-0"
+var promQLForJVMInfo = "process_uptime_seconds-0"
 
 // mian flow
 func WorkFlow(mType string) {
@@ -116,6 +117,10 @@ func initMetricMap(metricType string) (map[string]string, map[string]string) {
 			instanceToJob = utils.MergeMap(instanceToJob, e)
 		case "es":
 			f := etl.QueryFromProm(fmt.Sprintf("init elasticsearch, endpoint: %s", k), promQLForElasticSearchInfo, global.PromClients[k]).ElasticSearchInitInstanceMap()
+			instanceToJob = utils.MergeMap(instanceToJob, f)
+		case "jvm":
+			f := etl.QueryFromProm(fmt.Sprintf("init jvm, endpoint: %s", k), promQLForJVMInfo, global.PromClients[k]).JVMInitInstanceMap()
+			// map app_name to instance
 			instanceToJob = utils.MergeMap(instanceToJob, f)
 		default:
 			global.Logger.Error("endpoint's metric type is not supported", zap.String("type", v))

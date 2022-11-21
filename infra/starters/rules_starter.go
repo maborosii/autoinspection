@@ -31,6 +31,7 @@ func (d *RulesStarter) setupRules(conf *setting.Config) {
 		registerMap["kafka"] = new(kafkaRulesRegister)
 		registerMap["rabbitmq"] = new(rabbitMQRulesRegister)
 		registerMap["es"] = new(elasticSearchRulesRegister)
+		registerMap["jvm"] = new(jvmRulesRegister)
 	})
 
 	for tt, j := range conf.Rules {
@@ -108,5 +109,18 @@ func (n elasticSearchRulesRegister) register(confRules []interface{}) {
 			panic(fmt.Sprintf("mapstructure rules for elasticSearch occur error: %s", err))
 		}
 		global.NotifyRules[elasticSearchRule.GetRuleJob()] = elasticSearchRule
+	}
+}
+
+type jvmRulesRegister struct{}
+
+func (n jvmRulesRegister) register(confRules []interface{}) {
+	for _, jj := range confRules {
+		jvmRule := new(rs.JVMRule)
+		err := mapstructure.Decode(jj, jvmRule)
+		if err != nil {
+			panic(fmt.Sprintf("mapstructure rules for JVM occur error: %s", err))
+		}
+		global.NotifyRules[jvmRule.GetRuleJob()] = jvmRule
 	}
 }

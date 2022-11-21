@@ -53,6 +53,7 @@ func initAllLabelHandleMap() {
 	initKafkaLabelHandler()
 	initRabbitMQLabelHandler()
 	initElasticSearchLabelHandler()
+	initJVMLabelHandler()
 }
 
 func initNodeLabelHandleMap() {
@@ -162,5 +163,18 @@ func initElasticSearchLabelHandler() {
 	})
 	metricsLabelHandlerMap.registerHandler("es_health_status_before_1week", func(instance string, value float32, mm *metrics.MetricsMap) {
 		mm.CreateOrModify(instance, metrics.NewElasticSearchMetrics(instance), metrics.WithBefore1WeekElasticSearchHealthStatus(int8(value)))
+	})
+}
+
+func initJVMLabelHandler() {
+	// register jvm metrics handler
+	metricsLabelHandlerMap.registerHandler("jvm_blocked_threads_count", func(instance string, value float32, mm *metrics.MetricsMap) {
+		mm.CreateOrModify(instance, metrics.NewJVMMetrics(instance), metrics.WithJVMBlockedThreadCount(int8(value)))
+	})
+	metricsLabelHandlerMap.registerHandler("jvm_gc_time", func(instance string, value float32, mm *metrics.MetricsMap) {
+		mm.CreateOrModify(instance, metrics.NewJVMMetrics(instance), metrics.WithJVMGarbageCollectTime(value))
+	})
+	metricsLabelHandlerMap.registerHandler("jvm_gc_counts", func(instance string, value float32, mm *metrics.MetricsMap) {
+		mm.CreateOrModify(instance, metrics.NewJVMMetrics(instance), metrics.WithJVMGarbageCollectCount(value))
 	})
 }
