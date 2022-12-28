@@ -56,3 +56,8 @@ var sortedByJob = table.SortBy{
 	Name: "job",
 	Mode: table.Asc,
 }
+
+var sortedByMsg = table.SortBy{
+	Name: "告警信息",
+	Mode: table.Asc,
+}

@@ -35,9 +35,10 @@ func (jm *JVMMetrics) AdaptRules(r rs.RuleItf) {
 
 // 指标过滤
 func (jm *JVMMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
+	logMsg, alertNotFlag := "", true
 	// 若该指标项未匹配到规则
 	if jm.RuleItf == nil {
-		return "", true
+		return logMsg, alertNotFlag
 	}
 
 	/* 阻塞线程数瞬时值过滤
@@ -55,7 +56,9 @@ func (jm *JVMMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("appName", jm.appName),
 			zap.String("instance", jm.instance),
 			zap.Int8("jvm_blocked_thread_count", jm.blockedThreadCount))
-		return JVM_BLOCKED_THREAD_COUNT, false
+		// return JVM_BLOCKED_THREAD_COUNT, false
+		logMsg = logMsg + ": " + JVM_BLOCKED_THREAD_COUNT + "\n"
+		alertNotFlag = false
 	}
 
 	/* gc 时间瞬时值过滤
@@ -73,7 +76,9 @@ func (jm *JVMMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("appName", jm.appName),
 			zap.String("instance", jm.instance),
 			zap.String("jvm_gc_time", ut.FormatF(jm.garbageCollectTime)))
-		return JVM_GARBAGE_COLLECT_TIME, false
+		// return JVM_GARBAGE_COLLECT_TIME, false
+		logMsg = logMsg + ": " + JVM_GARBAGE_COLLECT_TIME + "\n"
+		alertNotFlag = false
 	}
 	/* gc 次数瞬时值过滤
 	 */
@@ -90,10 +95,11 @@ func (jm *JVMMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("appName", jm.appName),
 			zap.String("instance", jm.instance),
 			zap.String("jvm_gc_count", ut.FormatF(jm.garbageCollectCount)))
-		return JVM_GARBAGE_COLLECT_COUNT, false
+		// return JVM_GARBAGE_COLLECT_COUNT, false
+		logMsg = logMsg + ": " + JVM_GARBAGE_COLLECT_COUNT + "\n"
+		alertNotFlag = false
 	}
-
-	return "", true
+	return logMsg, alertNotFlag
 }
 
 func (jm *JVMMetrics) Print() string {

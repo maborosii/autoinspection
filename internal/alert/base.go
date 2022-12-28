@@ -101,7 +101,7 @@ func RenderTable(rows []table.Row) string {
 	t.AppendRows(rows)
 	t.SetAutoIndex(true)
 	// 根据指标类型和 job 名称进行排序
-	t.SortBy([]table.SortBy{sortedByKind, sortedByJob})
+	t.SortBy([]table.SortBy{sortedByKind, sortedByJob, sortedByMsg})
 
 	t.Style().HTML = table.HTMLOptions{
 		CSSClass:    "",

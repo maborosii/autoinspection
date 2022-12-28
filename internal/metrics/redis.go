@@ -38,9 +38,10 @@ func (rm *RedisMetrics) AdaptRules(r rs.RuleItf) {
 
 // 指标过滤
 func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
+	logMsg, alertNotFlag := "", true
 	// 若该指标项未匹配到规则
 	if rm.RuleItf == nil {
-		return "", true
+		return logMsg, alertNotFlag
 	}
 
 	connsInc1Day := ut.IncreaseRate(rm.before1DayConnsUsage, rm.connsUsage)
@@ -64,8 +65,11 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.String("redis_conns_increase_usage_1week", ut.FormatF2S(connsInc1Week)))
-		return REDIS_CONN_RATE_LIMIT_1WEEK, false
+		// return REDIS_CONN_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + REDIS_CONN_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithRedisMemIncrease1WeekRuleFilter(memInc1Week)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_MEM_RATE_LIMIT_1WEEK,
@@ -80,7 +84,9 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.String("redis_memory_increase_usage_1week", ut.FormatF2S(memInc1Week)))
-		return REDIS_MEM_RATE_LIMIT_1WEEK, false
+		// return REDIS_MEM_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + REDIS_MEM_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
 
 	/* 一天增长率过滤
@@ -99,8 +105,11 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.String("redis_conns_increase_usage_1day", ut.FormatF2S(connsInc1Day)))
-		return REDIS_CONN_RATE_LIMIT_1DAY, false
+		// return REDIS_CONN_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + REDIS_CONN_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithRedisMemIncrease1DayRuleFilter(memInc1Day)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_MEM_RATE_LIMIT_1DAY,
@@ -115,7 +124,9 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.String("redis_memory_increase_usage_1day", ut.FormatF2S(memInc1Day)))
-		return REDIS_MEM_RATE_LIMIT_1DAY, false
+		// return REDIS_MEM_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + REDIS_MEM_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
 
 	/* 瞬时值过滤
@@ -134,8 +145,11 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.Float32("redis_conns_usage", rm.connsUsage))
-		return REDIS_CONN_LIMIT, false
+		// return REDIS_CONN_LIMIT, false
+		logMsg = logMsg + ": " + REDIS_CONN_LIMIT + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithRedisMemRuleFilter(rm.memUsage)(rm.RuleItf); !ok {
 		alertMsgChan <- am.NewRedisAlertMessage(
 			rm.GetJob(), rm.instance, REDIS_MEM_LIMIT,
@@ -150,10 +164,13 @@ func (rm *RedisMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.String("redis_memory_usage", ut.FormatF2S(rm.memUsage)))
-		return REDIS_MEM_LIMIT, false
+		// return REDIS_MEM_LIMIT, false
+		logMsg = logMsg + ": " + REDIS_MEM_LIMIT + "\n"
+		alertNotFlag = false
 	}
 
-	return "", true
+	// return "", true
+	return logMsg, alertNotFlag
 }
 
 func (rm *RedisMetrics) Print() string {

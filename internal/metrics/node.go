@@ -44,9 +44,10 @@ func (nm *NodeMetrics) AdaptRules(r rs.RuleItf) {
 
 // 指标过滤
 func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
+	logMsg, alertNotFlag := "", true
 	// 若该指标项未匹配到规则
 	if nm.RuleItf == nil {
-		return "", true
+		return logMsg, alertNotFlag
 	}
 
 	cpuInc1Day := ut.IncreaseRate(nm.before1DayCPUUsage, nm.cpuUsage)
@@ -74,8 +75,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("cpu_increase_usage_1week", ut.FormatF2S(cpuInc1Week)))
-		return CPU_RATE_LIMIT_1WEEK, false
+		// return CPU_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + CPU_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithMemIncrease1WeekRuleFilter(memInc1Week)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, MEM_RATE_LIMIT_1WEEK,
@@ -86,8 +90,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			ut.FormatF2S(nm.before1WeekMemUsage))
 
 		global.Logger.Info(MEM_RATE_LIMIT_1WEEK, zap.String("job", nm.GetJob()), zap.String("instance", nm.instance), zap.String("mem_increase_usage_1week", ut.FormatF2S(memInc1Week)))
-		return MEM_RATE_LIMIT_1WEEK, false
+		// return MEM_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + MEM_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithTCPConnIncrease1WeekRuleFilter(tcpConnInc1Week)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, TCP_CONN_RATE_LIMIT_1WEEK,
@@ -102,8 +109,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("tcp_conn_increase_counts_1week", ut.FormatF2S(tcpConnInc1Week)))
-		return TCP_CONN_RATE_LIMIT_1WEEK, false
+		// return TCP_CONN_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + TCP_CONN_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithDiskIncrease1WeekRuleFilter(diskInc1Week)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, DISK_RATE_LIMIT_1WEEK,
@@ -118,7 +128,9 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("disk_increase_usage_1week", ut.FormatF2S(diskInc1Week)))
-		return DISK_RATE_LIMIT_1WEEK, false
+		// return DISK_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + DISK_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
 
 	/* 一天增长率过滤
@@ -137,8 +149,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("cpu_increase_usage_1day", ut.FormatF2S(cpuInc1Day)))
-		return CPU_RATE_LIMIT_1DAY, false
+		// return CPU_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + CPU_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithMemIncrease1DayRuleFilter(memInc1Day)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, MEM_RATE_LIMIT_1DAY,
@@ -153,8 +168,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("mem_increase_usage_1day", ut.FormatF2S(memInc1Day)))
-		return MEM_RATE_LIMIT_1DAY, false
+		// return MEM_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + MEM_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithTCPConnIncrease1DayRuleFilter(tcpConnInc1Day)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, TCP_CONN_RATE_LIMIT_1DAY,
@@ -169,8 +187,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("tcp_conn_increase_counts_1day", ut.FormatF2S(tcpConnInc1Day)))
-		return TCP_CONN_RATE_LIMIT_1DAY, false
+		// return TCP_CONN_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + TCP_CONN_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithDiskIncrease1DayRuleFilter(diskInc1Day)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, DISK_RATE_LIMIT_1DAY,
@@ -185,7 +206,9 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("disk_increase_usage_1day", ut.FormatF2S(diskInc1Day)))
-		return DISK_RATE_LIMIT_1DAY, false
+		// return DISK_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + DISK_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
 
 	/*瞬时值过滤
@@ -204,8 +227,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("cpu_usage", ut.FormatF2S(nm.cpuUsage)))
-		return CPU_LIMIT, false
+		// return CPU_LIMIT, false
+		logMsg = logMsg + ": " + CPU_LIMIT + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithMemRuleFilter(nm.memUsage)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, MEM_LIMIT,
@@ -220,8 +246,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("mem_usage", ut.FormatF2S(nm.memUsage)))
-		return MEM_LIMIT, false
+		// return MEM_LIMIT, false
+		logMsg = logMsg + ": " + MEM_LIMIT + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithTCPConnRuleFilter(nm.tcpConnUsage)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, TCP_CONN_LIMIT,
@@ -236,8 +265,11 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.Float32("tcp_conn_counts", nm.tcpConnUsage))
-		return TCP_CONN_LIMIT, false
+		// return TCP_CONN_LIMIT, false
+		logMsg = logMsg + ": " + TCP_CONN_LIMIT + "\n"
+		alertNotFlag = false
 	}
+
 	if alertM, ok := rs.WithDiskRuleFilter(nm.diskUsage)(nm.RuleItf); !ok {
 		alertMsgChan <- am.NewNodeAlertMessage(
 			nm.GetJob(), nm.instance, nm.nodeName, DISK_LIMIT,
@@ -252,10 +284,12 @@ func (nm *NodeMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
 			zap.String("job", nm.GetJob()),
 			zap.String("instance", nm.instance),
 			zap.String("disk_usage", ut.FormatF2S(nm.diskUsage)))
-		return DISK_LIMIT, false
+		// return DISK_LIMIT, false
+		logMsg = logMsg + ": " + DISK_LIMIT + "\n"
+		alertNotFlag = false
 	}
-
-	return "", true
+	// return "", true
+	return logMsg, alertNotFlag
 }
 
 func (nm *NodeMetrics) Print() string {

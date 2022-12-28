@@ -37,9 +37,10 @@ func (rm *RabbitMQMetrics) AdaptRules(r rs.RuleItf) {
 
 // 指标过滤
 func (rm *RabbitMQMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
+	logMsg, alertNotFlag := "", true
 	// 若该指标项未匹配到规则
 	if rm.RuleItf == nil {
-		return "", true
+		return logMsg, alertNotFlag
 	}
 
 	// nodeChange1day := rm.runningNodesUsage - rm.before1DayRunningNodesUsage
@@ -63,7 +64,9 @@ func (rm *RabbitMQMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, boo
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.Int8("rabbitmq_running_nodes", rm.runningNodesUsage))
-		return RABBITMQ_RUNNING_NODES, false
+		// return RABBITMQ_RUNNING_NODES, false
+		logMsg = logMsg + ": " + RABBITMQ_RUNNING_NODES + "\n"
+		alertNotFlag = false
 	}
 
 	/* 节点数一天变化过滤
@@ -120,7 +123,9 @@ func (rm *RabbitMQMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, boo
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.String("rabbitmq_lag_sum_increase_usage_1week", ut.FormatF2S(lagSumInc1Week)))
-		return RABBITMQ_LAG_SUM_RATE_LIMIT_1WEEK, false
+		// return RABBITMQ_LAG_SUM_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + RABBITMQ_LAG_SUM_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
 
 	/* 一天增长率过滤
@@ -139,7 +144,9 @@ func (rm *RabbitMQMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, boo
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.String("rabbitmq_lag_sum_increase_usage_1day", ut.FormatF2S(lagSumInc1Day)))
-		return RABBITMQ_LAG_SUM_RATE_LIMIT_1DAY, false
+		// return RABBITMQ_LAG_SUM_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + RABBITMQ_LAG_SUM_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
 
 	/* 瞬时值过滤
@@ -158,9 +165,12 @@ func (rm *RabbitMQMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, boo
 			zap.String("job", rm.GetJob()),
 			zap.String("instance", rm.instance),
 			zap.Float32("rabbitmq_lag_sum_usage", rm.lagSumUsage))
-		return RABBITMQ_LAG_SUM_LIMIT, false
+		// return RABBITMQ_LAG_SUM_LIMIT, false
+		logMsg = logMsg + ": " + RABBITMQ_LAG_SUM_LIMIT + "\n"
+		alertNotFlag = false
 	}
-	return "", true
+	// return "", true
+	return logMsg, alertNotFlag
 }
 
 func (rm *RabbitMQMetrics) Print() string {

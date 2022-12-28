@@ -34,9 +34,10 @@ func (em *ElasticSearchMetrics) AdaptRules(r rs.RuleItf) {
 
 // 指标过滤
 func (em *ElasticSearchMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
+	logMsg, alertNotFlag := "", true
 	// 若该指标项未匹配到规则
 	if em.RuleItf == nil {
-		return "", true
+		return logMsg, alertNotFlag
 	}
 
 	// statusChange1day := em.healthStatus - em.before1DayHealthStatus
@@ -58,7 +59,9 @@ func (em *ElasticSearchMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string
 			zap.String("job", em.GetJob()),
 			zap.String("instance", em.instance),
 			zap.Int8("elasticsearch_health_status", em.healthStatus))
-		return ELASTICSEARCH_HEALTH_STATUS, false
+		// return ELASTICSEARCH_HEALTH_STATUS, false
+		logMsg = logMsg + ": " + ELASTICSEARCH_HEALTH_STATUS + "\n"
+		alertNotFlag = false
 	}
 
 	/* 健康状态一天变化过滤
@@ -98,8 +101,7 @@ func (em *ElasticSearchMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string
 	// 		zap.Int8("elasticsearch_health_status_changed_1week", statusChange1Week))
 	// 	return ELASTICSEARCH_HEALTH_STATUS_CHANGED_1WEEK, false
 	// }
-
-	return "", true
+	return logMsg, alertNotFlag
 }
 
 func (em *ElasticSearchMetrics) Print() string {

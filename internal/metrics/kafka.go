@@ -34,9 +34,10 @@ func (km *KafkaMetrics) AdaptRules(r rs.RuleItf) {
 
 // 指标过滤
 func (km *KafkaMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) {
+	logMsg, alertNotFlag := "", true
 	// 若该指标项未匹配到规则
 	if km.RuleItf == nil {
-		return "", true
+		return logMsg, alertNotFlag
 	}
 
 	lagSumInc1Day := ut.IncreaseRate(km.before1DayLagSumUsage, km.lagSumUsage)
@@ -58,7 +59,9 @@ func (km *KafkaMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", km.GetJob()),
 			zap.String("instance", km.instance),
 			zap.String("kafka_lag_sum_increase_usage_1week", ut.FormatF2S(lagSumInc1Week)))
-		return KAFKA_LAG_SUM_RATE_LIMIT_1WEEK, false
+		// return KAFKA_LAG_SUM_RATE_LIMIT_1WEEK, false
+		logMsg = logMsg + ": " + KAFKA_LAG_SUM_RATE_LIMIT_1WEEK + "\n"
+		alertNotFlag = false
 	}
 
 	/* 一天增长率过滤
@@ -77,7 +80,9 @@ func (km *KafkaMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", km.GetJob()),
 			zap.String("instance", km.instance),
 			zap.String("kafka_lag_sum_increase_usage_1day", ut.FormatF2S(lagSumInc1Day)))
-		return KAFKA_LAG_SUM_RATE_LIMIT_1DAY, false
+		// return KAFKA_LAG_SUM_RATE_LIMIT_1DAY, false
+		logMsg = logMsg + ": " + KAFKA_LAG_SUM_RATE_LIMIT_1DAY + "\n"
+		alertNotFlag = false
 	}
 
 	/* 瞬时值过滤
@@ -96,9 +101,11 @@ func (km *KafkaMetrics) Filter(alertMsgChan chan<- am.AlertInfo) (string, bool) 
 			zap.String("job", km.GetJob()),
 			zap.String("instance", km.instance),
 			zap.Float32("kafka_lag_sum_usage", km.lagSumUsage))
-		return KAFKA_LAG_SUM_LIMIT, false
+		// return KAFKA_LAG_SUM_LIMIT, false
+		logMsg = logMsg + ": " + KAFKA_LAG_SUM_LIMIT + "\n"
+		alertNotFlag = false
 	}
-	return "", true
+	return logMsg, alertNotFlag
 }
 
 func (km *KafkaMetrics) Print() string {
